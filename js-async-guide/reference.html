@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reference — Promises & Async</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav-inner">
+    <a href="../index.html" class="logo"><span class="logo-bracket">←</span> <span style="color:var(--text2)">Fork My Brain</span></a>
+    <div class="nav-links">
+      <a href="../index.html" class="nav-link">Hub</a>
+      <a href="index.html" class="nav-link">Async</a>
+      <a href="playground.html" class="nav-link">Playground</a>
+      <a href="reference.html" class="nav-link active">Reference</a>
+    </div>
+  </nav>
+</header>
+
+<div class="ref-layout">
+  <div class="ref-hero">
+    <div class="ref-title">Promises & Async reference</div>
+    <div class="ref-sub">All Promise static/instance methods + async/await keywords, sourced from MDN.</div>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="q" placeholder="Search, e.g. all, await, catch, race…" oninput="render()">
+  </div>
+  <div class="ref-filters" id="filters"></div>
+  <div class="ref-count" id="count"></div>
+  <div id="list"></div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <a href="../index.html" class="logo"><span class="logo-bracket">[</span>JS<span class="logo-accent">Async</span><span class="logo-bracket">]</span></a>
+    <span class="footer-note">Part of Fork My Brain · Open source</span>
+    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank" rel="noopener" class="footer-link">MDN Docs ↗</a>
+  </div>
+</footer>
+
+<script>
+const METHODS = [
+  // ── Constructor ──
+  {name:"new Promise(executor)",cat:"constructor",summary:"Create a Promise — wrap callback-based code",desc:"Creates a new Promise. The executor function runs synchronously and receives two callbacks: resolve(value) to fulfill and reject(reason) to reject. Any error thrown inside the executor automatically rejects the promise.",code:`const p = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    if (Math.random() > 0.5) resolve("success!");
+    else reject(new Error("failed!"));
+  }, 1000);
+});`,tip:"Only use new Promise() to wrap old callback-based APIs. For everything else, use async/await."},
+
+  // ── Static concurrency ──
+  {name:"Promise.all()",cat:"concurrency",summary:"Wait for ALL — rejects if any one rejects (fail-fast)",desc:"Takes an array of promises and returns a new Promise that fulfills when ALL input promises fulfill. Results are returned as an array in the SAME ORDER as input (not completion order). If ANY promise rejects, the whole thing rejects immediately with that reason.",code:`const [user, posts, settings] = await Promise.all([
+  fetchUser(id),    // 300ms
+  fetchPosts(id),   // 500ms
+  fetchSettings()   // 200ms
+]);
+// Total: 500ms (slowest), not 1000ms
+// If any one fails → entire Promise.all rejects`,tip:"Use when ALL results are required and a single failure should abort everything."},
+  {name:"Promise.allSettled()",cat:"concurrency",summary:"Wait for ALL — never rejects, gives status for each",desc:"Like Promise.all() but waits for ALL promises to settle (fulfill or reject) and never rejects itself. Returns an array of { status: 'fulfilled', value } or { status: 'rejected', reason } objects.",code:`const results = await Promise.allSettled([
+  fetchUser(),   // resolves
+  fetchPosts(),  // REJECTS
+  fetchConfig()  // resolves
+]);
+
+results.forEach(r => {
+  if (r.status === "fulfilled") use(r.value);
+  else logError(r.reason);
+});`,tip:"Use when independent operations can fail individually — you want to handle each result separately."},
+  {name:"Promise.race()",cat:"concurrency",summary:"First to settle (fulfill OR reject) wins",desc:"Returns a Promise that settles with the same state and value/reason as the first input promise that settles — whether fulfilled or rejected. Remaining promises are ignored.",code:`// Timeout pattern:
+const result = await Promise.race([
+  fetchData(),              // real request
+  new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("timeout")), 5000)
+  )
+]);`,tip:"Classic use: implement request timeouts by racing a real request against a setTimeout-based rejection."},
+  {name:"Promise.any()",cat:"concurrency",summary:"First to FULFILL wins — ignores rejections",desc:"Like Promise.race() but only cares about the first FULFILLMENT. Ignores rejections unless ALL promises reject, in which case it rejects with an AggregateError containing all rejection reasons.",code:`// Try multiple CDN mirrors — use the fastest:
+const resource = await Promise.any([
+  fetch("https://cdn1.example.com/lib.js"),
+  fetch("https://cdn2.example.com/lib.js"),
+  fetch("https://cdn3.example.com/lib.js"),
+]);
+// First successful response wins, others ignored`,tip:"Perfect for trying multiple fallback sources — e.g. CDNs, mirrors, or backup APIs."},
+
+  // ── Static creation ──
+  {name:"Promise.resolve()",cat:"static",summary:"Create an immediately fulfilled Promise",desc:"Returns a Promise that is already fulfilled with the given value. If passed another Promise, returns that same Promise. If passed a thenable, adopts its behavior.",code:`// Wrap a sync value for an async interface:
+function getUser(id) {
+  const cached = cache.get(id);
+  if (cached) return Promise.resolve(cached);
+  return fetchFromAPI(id);
+}
+
+Promise.resolve(42).then(v => console.log(v)); // 42`,tip:"Use to make synchronous values fit into async pipelines or return early from async functions."},
+  {name:"Promise.reject()",cat:"static",summary:"Create an immediately rejected Promise",desc:"Returns a Promise that is already rejected with the given reason. Always pass an Error object as the reason.",code:`// Create a pre-rejected promise:
+const p = Promise.reject(new Error("Not allowed"));
+p.catch(err => console.error(err.message)); // "Not allowed"
+
+// Useful in async functions:
+async function getUser(id) {
+  if (!id) return Promise.reject(new Error("ID required"));
+  return fetchUser(id);
+}`,tip:"Always pass an Error object, not a plain string — so you get a stack trace."},
+  {name:"Promise.withResolvers()",cat:"static",summary:"Get resolve/reject outside the constructor — ES2024",desc:"Returns an object { promise, resolve, reject } — giving you the resolve and reject functions in scope without the old 'let resolve; new Promise(r => resolve = r)' hack. Baseline widely available since 2024.",code:`const { promise, resolve, reject } = Promise.withResolvers();
+
+// Now wire to events cleanly:
+eventEmitter.on("data",  resolve);
+eventEmitter.on("error", reject);
+
+// Or for manual control:
+button.addEventListener("click", () => resolve("clicked!"));
+
+const result = await promise; // "clicked!"`,tip:"Makes deferred patterns clean. Previously required an awkward 'resolve escape' pattern."},
+  {name:"Promise.try()",cat:"static",summary:"Wrap any function (sync or async) in a Promise — ES2025",desc:"Calls a function and wraps its result in a Promise — whether it returns synchronously, throws, or returns a Promise. Errors from synchronous throws are caught as rejections. Baseline newly available in 2025.",code:`// Works with sync functions:
+Promise.try(() => JSON.parse(data))
+  .then(obj => use(obj))
+  .catch(err => console.error("Invalid JSON:", err));
+
+// Works with async functions too:
+Promise.try(() => fetchUser(id))
+  .then(user => show(user))
+  .catch(err => showError(err));`,tip:"Use when you don't know if a function is sync or async — replaces Promise.resolve().then(() => fn())."},
+
+  // ── Instance methods ──
+  {name:".then(onFulfilled, onRejected?)",cat:"instance",summary:"Handle fulfillment (and optionally rejection)",desc:"Schedules callbacks for when the Promise fulfills or rejects. Returns a NEW Promise with the return value of the called callback — enabling chaining. If onFulfilled returns a Promise, the chain waits for it.",code:`fetch("/api/user")
+  .then(res => res.json())        // transform response
+  .then(user => user.name)        // pluck field
+  .then(name => console.log(name)); // "Mankal"
+
+// .then() can also handle rejection (2nd arg):
+p.then(
+  value => console.log("success", value),
+  error => console.log("error", error)  // same as .catch()
+);`,tip:"Chain .then() calls to transform data step by step. Only use the second argument instead of .catch() when you need different handlers per step."},
+  {name:".catch(onRejected)",cat:"instance",summary:"Handle rejection anywhere in a chain",desc:"Equivalent to .then(undefined, onRejected). Catches any rejection from the promise it's called on OR any rejection that wasn't caught earlier in the chain. After .catch(), the chain continues as fulfilled with catch's return value.",code:`fetchUser(id)
+  .then(user => user.posts)   // might throw
+  .catch(err => {
+    console.error(err.message);
+    return [];  // recover — chain continues with []
+  })
+  .then(posts => console.log(posts.length)); // 0`,tip:"Place .catch() at the end of a chain to handle any error from any step. Return a fallback value to recover."},
+  {name:".finally(onFinally)",cat:"instance",summary:"Always runs — whether fulfilled or rejected",desc:"Runs the callback when the promise settles regardless of outcome. The callback receives no arguments. Passes through the original fulfilled value or rejection reason unchanged — unless finally throws or returns a rejected promise.",code:`async function loadData() {
+  showSpinner();
+  try {
+    return await fetchData();
+  } catch (err) {
+    showError(err);
+  } finally {
+    hideSpinner(); // ALWAYS runs, no matter what
+  }
+}
+
+// With promise chains:
+fetchData()
+  .then(show)
+  .catch(showError)
+  .finally(hideSpinner); // always called`,tip:"Perfect for cleanup — hiding spinners, closing connections, releasing locks."},
+
+  // ── async/await ──
+  {name:"async function",cat:"asyncawait",summary:"Make a function always return a Promise",desc:"The async keyword before a function makes it always return a Promise. Return values are automatically wrapped in Promise.resolve(). Thrown errors are wrapped in Promise.reject(). Enables use of await inside.",code:`async function getUser(id) {
+  return { id, name: "Mankal" };
+  // Same as: return Promise.resolve({ id, name: "Mankal" })
+}
+
+// Works on any function form:
+const getUser = async (id) => fetch(\`/api/users/\${id}\`);
+const obj = { async load() { return fetch("/api"); } };`,tip:"You must use async to use await inside a function. Top-level await is available in ES modules without async."},
+  {name:"await expression",cat:"asyncawait",summary:"Pause until a Promise settles — returns resolved value",desc:"Pauses the async function until the Promise settles. Returns the fulfilled value. If the Promise rejects, await throws the rejection reason (catchable with try/catch). Only usable inside async functions (or top-level in modules).",code:`async function loadDashboard(id) {
+  // Each await pauses until resolved
+  const user  = await fetchUser(id);   // waits for user
+  const posts = await fetchPosts(id);  // waits for posts
+
+  // ✅ Run independently in parallel:
+  const [user2, posts2] = await Promise.all([
+    fetchUser(id), fetchPosts(id)
+  ]);
+}`,tip:"Don't await independent operations sequentially — use Promise.all() to run them in parallel."},
+  {name:"for await...of",cat:"asyncawait",summary:"Iterate over async iterables",desc:"Asynchronous version of for...of. Works with async iterables like ReadableStream, async generators, and any object implementing the async iterator protocol.",code:`// Async generator:
+async function* paginate(url) {
+  let page = 1;
+  while (true) {
+    const data = await fetch(\`\${url}?page=\${page++}\`).then(r => r.json());
+    if (!data.length) break;
+    yield data;
+  }
+}
+
+for await (const page of paginate("/api/posts")) {
+  renderPosts(page);
+}`,tip:"Essential for streaming APIs, async generators, and paginated data sources."},
+  {name:"Top-level await",cat:"asyncawait",summary:"Use await outside async functions in ES modules",desc:"In ES modules (.mjs or <script type='module'>), you can use await at the top level without wrapping in an async function. The module will pause loading until the awaited Promise resolves.",code:`// In a module file (script type=module or .mjs):
+const config = await fetch("/config.json").then(r => r.json());
+const db = await connectDatabase(config.dbUrl);
+
+export { config, db }; // other modules wait for these`,tip:"Only works in ES modules — not in CommonJS (require). The whole module is treated like an async function."},
+];
+
+const CATS = [
+  {key:"all",       label:"All"},
+  {key:"constructor",label:"Constructor"},
+  {key:"concurrency",label:"Concurrency"},
+  {key:"static",    label:"Static"},
+  {key:"instance",  label:"Instance"},
+  {key:"asyncawait",label:"async/await"},
+];
+const BADGE = {constructor:"mutates",concurrency:"copy",static:"iter",instance:"search",asyncawait:"other"};
+let activeCat="all", openSet=new Set();
+
+function render(){
+  const q=document.getElementById("q").value.toLowerCase();
+  const filtered=METHODS.filter(m=>{
+    const cm=activeCat==="all"||m.cat===activeCat;
+    const qm=!q||m.name.toLowerCase().includes(q)||m.summary.toLowerCase().includes(q)||m.desc.toLowerCase().includes(q);
+    return cm&&qm;
+  });
+  document.getElementById("count").textContent=`${filtered.length} method${filtered.length!==1?"s":""}`;
+  document.getElementById("list").innerHTML=filtered.map(m=>{
+    const open=openSet.has(m.name);
+    const esc=m.code.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    return `<div class="method-card">
+      <div class="method-header" onclick="toggle('${m.name.replace(/['"]/g,"")}')">
+        <span class="method-name">${m.name}</span>
+        <span class="method-badge ${BADGE[m.cat]||'other'}">${m.cat}</span>
+        <span class="method-summary">${m.summary}</span>
+        <span class="method-chevron${open?" open":""}">▾</span>
+      </div>
+      ${open?`<div class="method-body">
+        <p class="method-desc">${m.desc}</p>
+        <div class="method-example">${esc}</div>
+        <p class="method-tip">💡 ${m.tip}</p>
+      </div>`:""}
+    </div>`;
+  }).join("");
+}
+
+function toggle(name){
+  if(openSet.has(name))openSet.delete(name);
+  else openSet.add(name);
+  render();
+}
+
+const filtersEl=document.getElementById("filters");
+CATS.forEach(c=>{
+  const el=document.createElement("button");
+  el.className="ref-pill"+(c.key==="all"?" active":"");
+  el.textContent=c.label;
+  el.onclick=()=>{
+    activeCat=c.key;
+    document.querySelectorAll(".ref-pill").forEach(p=>p.classList.remove("active"));
+    el.classList.add("active");
+    render();
+  };
+  filtersEl.appendChild(el);
+});
+render();
+</script>
+</body>
+</html>

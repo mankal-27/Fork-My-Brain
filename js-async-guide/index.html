@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promises & Async — Fork My Brain</title>
+<meta name="description" content="Master JavaScript Promises and async/await through animated real-world examples — API calls, concurrency, error handling and more.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav-inner">
+    <a href="../index.html" class="logo"><span class="logo-bracket">←</span> <span style="color:var(--text2)">Fork My Brain</span></a>
+    <div class="nav-links">
+      <a href="../index.html" class="nav-link">Hub</a>
+      <a href="index.html" class="nav-link active">Async</a>
+      <a href="playground.html" class="nav-link">Playground</a>
+      <a href="reference.html" class="nav-link">Reference</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-eyebrow">JavaScript · Promises · async/await · Interactive</div>
+    <h1 class="hero-title">Async JS,<br><span class="hero-accent">finally makes sense</span></h1>
+    <p class="hero-sub">Promises, async/await, fetch(), and all concurrency methods — explained with animated flow diagrams and real API scenarios. No callback hell.</p>
+    <div class="hero-cta">
+      <a href="playground.html" class="btn-primary">Try the playground</a>
+      <a href="reference.html" class="btn-secondary">Browse all methods</a>
+    </div>
+    <div class="hero-code">
+      <div class="code-window">
+        <div class="code-toolbar">
+          <span class="dot dot-red"></span><span class="dot dot-amber"></span><span class="dot dot-green"></span>
+          <span class="code-filename">async.js</span>
+        </div>
+        <pre class="code-body"><span class="c-comment">// From callback hell...</span>
+getUser(id, (err, user) => {
+  getPosts(user.id, (err, posts) => {
+    getComments(posts[0].id, (err, comments) => {
+      <span class="c-comment">// 😱 nested forever</span>
+    });
+  });
+});
+
+<span class="c-comment">// ...to async/await clarity</span>
+<span class="c-kw">async function</span> <span class="c-method">loadDashboard</span>(id) {
+  <span class="c-kw">const</span> user     = <span class="c-kw">await</span> getUser(id);
+  <span class="c-kw">const</span> posts    = <span class="c-kw">await</span> getPosts(user.id);
+  <span class="c-kw">const</span> comments = <span class="c-kw">await</span> getComments(posts[0].id);
+  <span class="c-kw">return</span> { user, posts, comments };
+}
+
+<span class="c-comment">// Even better — run in parallel</span>
+<span class="c-kw">const</span> [user, posts] = <span class="c-kw">await</span> <span class="c-method">Promise</span>.all([
+  getUser(id), getPosts(id)
+]);</pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="scenarios-section">
+    <div class="section-label">What you'll learn</div>
+    <h2 class="section-title">5 animated scenarios</h2>
+    <div class="scenario-grid">
+
+      <a href="playground.html?s=lifecycle" class="scenario-card">
+        <div class="sc-icon">🔄</div>
+        <div class="sc-name">Promise lifecycle</div>
+        <div class="sc-desc">pending → fulfilled / rejected</div>
+        <div class="sc-methods">
+          <code>new Promise</code><code>.then</code><code>.catch</code><code>.finally</code>
+        </div>
+      </a>
+
+      <a href="playground.html?s=async" class="scenario-card">
+        <div class="sc-icon">⚡</div>
+        <div class="sc-name">async / await</div>
+        <div class="sc-desc">Async that reads like sync code</div>
+        <div class="sc-methods">
+          <code>async</code><code>await</code><code>try/catch</code>
+        </div>
+      </a>
+
+      <a href="playground.html?s=concurrency" class="scenario-card">
+        <div class="sc-icon">🚦</div>
+        <div class="sc-name">Promise concurrency</div>
+        <div class="sc-desc">Run multiple promises together</div>
+        <div class="sc-methods">
+          <code>Promise.all</code><code>allSettled</code><code>race</code><code>any</code>
+        </div>
+      </a>
+
+      <a href="playground.html?s=fetch" class="scenario-card">
+        <div class="sc-icon">🌐</div>
+        <div class="sc-name">Real API calls</div>
+        <div class="sc-desc">fetch(), .json(), error handling</div>
+        <div class="sc-methods">
+          <code>fetch</code><code>response.ok</code><code>.json</code>
+        </div>
+      </a>
+
+      <a href="playground.html?s=patterns" class="scenario-card">
+        <div class="sc-icon">🧩</div>
+        <div class="sc-name">Async patterns</div>
+        <div class="sc-desc">Chaining, withResolvers, try()</div>
+        <div class="sc-methods">
+          <code>Promise.resolve</code><code>withResolvers</code><code>Promise.try</code>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <section class="methods-preview">
+    <div class="section-label">Quick reference</div>
+    <h2 class="section-title">All Promise methods</h2>
+    <div class="method-tag-grid">
+      <div class="tag-group">
+        <div class="tag-group-label copy">Static — concurrency</div>
+        <div class="tag-list">
+          <span class="mtag copy">Promise.all()</span>
+          <span class="mtag copy">Promise.allSettled()</span>
+          <span class="mtag copy">Promise.race()</span>
+          <span class="mtag copy">Promise.any()</span>
+        </div>
+      </div>
+      <div class="tag-group">
+        <div class="tag-group-label iter">Static — creation</div>
+        <div class="tag-list">
+          <span class="mtag iter">Promise.resolve()</span>
+          <span class="mtag iter">Promise.reject()</span>
+          <span class="mtag iter">Promise.withResolvers()</span>
+          <span class="mtag iter">Promise.try()</span>
+        </div>
+      </div>
+      <div class="tag-group">
+        <div class="tag-group-label search">Instance methods</div>
+        <div class="tag-list">
+          <span class="mtag search">.then()</span>
+          <span class="mtag search">.catch()</span>
+          <span class="mtag search">.finally()</span>
+        </div>
+      </div>
+      <div class="tag-group">
+        <div class="tag-group-label other">async / await keywords</div>
+        <div class="tag-list">
+          <span class="mtag other">async function</span>
+          <span class="mtag other">await expression</span>
+          <span class="mtag other">for await...of</span>
+          <span class="mtag other">top-level await</span>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:2rem">
+      <a href="reference.html" class="btn-secondary">View full reference with examples →</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span class="logo"><span class="logo-bracket">[</span>JS<span class="logo-accent">Async</span><span class="logo-bracket">]</span></span>
+    <span class="footer-note">Part of Fork My Brain · Open source</span>
+    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank" rel="noopener" class="footer-link">MDN Docs ↗</a>
+  </div>
+</footer>
+
+</body>
+</html>
