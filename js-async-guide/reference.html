@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
-<title>Promises & Async Reference — Fork My Brain</title>
+<title>Async JS Reference — Fork My Brain</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -20,7 +20,6 @@
     </div>
   </nav>
 </header>
-
 <div class="ref-layout">
   <div class="ref-title">Async JS reference</div>
   <div class="ref-sub">All methods from MDN — click any card to expand.</div>
@@ -32,7 +31,6 @@
   <div class="ref-count" id="count"></div>
   <div id="list"></div>
 </div>
-
 <footer class="site-footer">
   <div class="footer-inner">
     <span class="logo"><span class="logo-bracket">[</span>JS<span class="logo-accent">Async JS</span><span class="logo-bracket">]</span></span>
@@ -40,8 +38,6 @@
     <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank" rel="noopener noreferrer" class="footer-link">MDN Docs ↗</a>
   </div>
 </footer>
-
-<script src="js/ref-engine.js"></script>
 <script>
 const BADGE = {"constructor":"mutates","concurrency":"copy","static":"iter","instance":"search","asyncawait":"other"};
 const CATS  = [{"key":"all","label":"All"},{"key":"constructor","label":"Constructor"},{"key":"concurrency","label":"Concurrency"},{"key":"static","label":"Static"},{"key":"instance","label":"Instance"},{"key":"asyncawait","label":"async/await"}];
@@ -140,9 +136,66 @@ p.then(
   .then(user => user.posts)   // might throw
   .catch(err => {
     console.error(err.message);
-    return [];
-buildFilters(CATS);
-renderRef();
+    return [];  // recover — chain continues with []
+  })
+  .then(posts => console.log(posts.length)); // 0`,tip:"Place .catch() at the end of a chain to handle any error from any step. Return a fallback value to recover."},
+  {name:".finally(onFinally)",cat:"instance",summary:"Always runs — whether fulfilled or rejected",desc:"Runs the callback when the promise settles regardless of outcome. The callback receives no arguments. Passes through the original fulfilled value or rejection reason unchanged — unless finally throws or returns a rejected promise.",code:`async function loadData() {
+  showSpinner();
+  try {
+    return await fetchData();
+  } catch (err) {
+    showError(err);
+  } finally {
+    hideSpinner(); // ALWAYS runs, no matter what
+  }
+}
+
+// With promise chains:
+fetchData()
+  .then(show)
+  .catch(showError)
+  .finally(hideSpinner); // always called`,tip:"Perfect for cleanup — hiding spinners, closing connections, releasing locks."},
+
+  // ── async/await ──
+  {name:"async function",cat:"asyncawait",summary:"Make a function always return a Promise",desc:"The async keyword before a function makes it always return a Promise. Return values are automatically wrapped in Promise.resolve(). Thrown errors are wrapped in Promise.reject(). Enables use of await inside.",code:`async function getUser(id) {
+  return { id, name: "Mankal" };
+  // Same as: return Promise.resolve({ id, name: "Mankal" })
+}
+
+// Works on any function form:
+const getUser = async (id) => fetch(\`/api/users/\${id}\`);
+const obj = { async load() { return fetch("/api"); } };`,tip:"You must use async to use await inside a function. Top-level await is available in ES modules without async."},
+  {name:"await expression",cat:"asyncawait",summary:"Pause until a Promise settles — returns resolved value",desc:"Pauses the async function until the Promise settles. Returns the fulfilled value. If the Promise rejects, await throws the rejection reason (catchable with try/catch). Only usable inside async functions (or top-level in modules).",code:`async function loadDashboard(id) {
+  // Each await pauses until resolved
+  const user  = await fetchUser(id);   // waits for user
+  const posts = await fetchPosts(id);  // waits for posts
+
+  // ✅ Run independently in parallel:
+  const [user2, posts2] = await Promise.all([
+    fetchUser(id), fetchPosts(id)
+  ]);
+}`,tip:"Don't await independent operations sequentially — use Promise.all() to run them in parallel."},
+  {name:"for await...of",cat:"asyncawait",summary:"Iterate over async iterables",desc:"Asynchronous version of for...of. Works with async iterables like ReadableStream, async generators, and any object implementing the async iterator protocol.",code:`// Async generator:
+async function* paginate(url) {
+  let page = 1;
+  while (true) {
+    const data = await fetch(\`\${url}?page=\${page++}\`).then(r => r.json());
+    if (!data.length) break;
+    yield data;
+  }
+}
+
+for await (const page of paginate("/api/posts")) {
+  renderPosts(page);
+}`,tip:"Essential for streaming APIs, async generators, and paginated data sources."},
+  {name:"Top-level await",cat:"asyncawait",summary:"Use await outside async functions in ES modules",desc:"In ES modules (.mjs or <script type='module'>), you can use await at the top level without wrapping in an async function. The module will pause loading until the awaited Promise resolves.",code:`// In a module file (script type=module or .mjs):
+const config = await fetch("/config.json").then(r => r.json());
+const db = await connectDatabase(config.dbUrl);
+
+export { config, db }; // other modules wait for these`,tip:"Only works in ES modules — not in CommonJS (require). The whole module is treated like an async function."},
+];
 </script>
+<script src="js/ref-engine.js"></script>
+<script>buildFilters(CATS); renderRef();</script>
 </body>
 </html>

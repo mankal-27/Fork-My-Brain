@@ -20,7 +20,6 @@
     </div>
   </nav>
 </header>
-
 <div class="ref-layout">
   <div class="ref-title">String Methods reference</div>
   <div class="ref-sub">All methods from MDN — click any card to expand.</div>
@@ -32,7 +31,6 @@
   <div class="ref-count" id="count"></div>
   <div id="list"></div>
 </div>
-
 <footer class="site-footer">
   <div class="footer-inner">
     <span class="logo"><span class="logo-bracket">[</span>JS<span class="logo-accent">String Methods</span><span class="logo-bracket">]</span></span>
@@ -40,8 +38,6 @@
     <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank" rel="noopener noreferrer" class="footer-link">MDN Docs ↗</a>
   </div>
 </footer>
-
-<script src="js/ref-engine.js"></script>
 <script>
 const BADGE = {"static":"static","search":"search","transform":"copy","extract":"iter","build":"mutates","inspect":"other"};
 const CATS  = [{"key":"all","label":"All"},{"key":"static","label":"Static"},{"key":"search","label":"Search"},{"key":"transform","label":"Transform"},{"key":"extract","label":"Extract"},{"key":"build","label":"Build"},{"key":"inspect","label":"Inspect"}];
@@ -152,9 +148,68 @@ a.normalize() === b.normalize(); // true`,tip:"Use NFC form (default) when stori
 
 // Old way:
 const s = "Hello";
-s[s.length - 1];
-buildFilters(CATS);
-renderRef();
+s[s.length - 1]; // "o"  ← verbose`,tip:"Much cleaner than str[str.length - 1] for the last character."},
+  {name:".charAt()",cat:"extract",summary:"Get character at a specific index",desc:"Returns the character at the specified index. Similar to bracket notation but returns '' (empty string) for out-of-range indices instead of undefined.",code:`"Hello".charAt(1);   // "e"
+"Hello".charAt(10);  // "" (empty string — no error)
+"Hello"[10];          // undefined`,tip:"Use .at() for modern code — it supports negative indices. charAt() is mostly legacy."},
+  {name:".split()",cat:"extract",summary:"Split string into an array at a separator",desc:"Divides a string into an ordered array of substrings by searching for a separator. The separator is removed from the result.",code:`"a,b,c".split(",");      // ["a", "b", "c"]
+"hello".split("");       // ["h","e","l","l","o"]
+"one two".split(" ", 2); // ["one", "two"] ← limit result count
+"abc".split();           // ["abc"] ← no separator = whole string in array`,tip:"The opposite of Array .join(). Combine them to transform strings: str.split(' ').reverse().join(' ')"},
+  // ── Build ──
+  {name:".concat()",cat:"build",summary:"Join strings together",desc:"Concatenates one or more strings and returns a new string. Rarely used — template literals and + are almost always preferred.",code:`"Hello".concat(" ", "World"); // "Hello World"
+"".concat("a", "b", "c");    // "abc"
+
+// Preferred alternatives:
+\`Hello \${"World"}\`          // template literal
+"Hello" + " " + "World"       // + operator`,tip:"In practice, just use template literals or the + operator. concat() is legacy."},
+  {name:".padStart()",cat:"build",summary:"Pad string from the start to a target length",desc:"Pads the current string from the LEFT with the pad string until it reaches the target length. Useful for right-aligning numbers and formatting fixed-width output.",code:`"42".padStart(5);         // "   42"  (spaces)
+"42".padStart(5, "0");    // "00042"  (zero-padded)
+"42".padStart(5, "ab");   // "aba42"  (pattern repeats)
+"12345".padStart(3);      // "12345"  (already longer, unchanged)`,tip:"Classic use: zero-pad numbers for dates: '5'.padStart(2,'0') → '05'"},
+  {name:".padEnd()",cat:"build",summary:"Pad string from the end to a target length",desc:"Pads the current string from the RIGHT with the pad string until it reaches the target length. Useful for left-aligning text in fixed-width output.",code:`"hello".padEnd(10);         // "hello     "
+"hello".padEnd(10, ".");    // "hello....."
+"hello".padEnd(10, "123");  // "hello12312"`,tip:"Pair with padStart() for perfectly aligned table columns and receipt formatting."},
+  {name:".repeat()",cat:"build",summary:"Repeat string n times",desc:"Returns a new string consisting of the original string repeated the given number of times.",code:`"ha".repeat(3);    // "hahaha"
+"-".repeat(20);    // "--------------------"
+"abc".repeat(0);   // ""
+"abc".repeat(1);   // "abc"`,tip:"Great for building separator lines, loading dots, or progress bars without a loop."},
+  // ── Inspect ──
+  {name:".charCodeAt()",cat:"inspect",summary:"Get UTF-16 code unit of a character",desc:"Returns the UTF-16 code unit value (0–65535) of the character at the given index. Returns NaN if index is out of range.",code:`"A".charCodeAt(0);  // 65
+"a".charCodeAt(0);  // 97
+"Z".charCodeAt(0);  // 90
+
+// Simple Caesar cipher shift:
+String.fromCharCode("A".charCodeAt(0) + 1); // "B"`,tip:"Use codePointAt() for emoji and characters outside the BMP (> U+FFFF)."},
+  {name:".codePointAt()",cat:"inspect",summary:"Get full Unicode code point of a character",desc:"Returns the full Unicode code point value at the given index, including characters outside the BMP (emoji, rare scripts).",code:`"😀".codePointAt(0); // 128512
+"A".codePointAt(0);  // 65
+
+// Check if character is emoji:
+"😀".codePointAt(0) > 65535; // true`,tip:"Use this instead of charCodeAt() when working with emoji or any Unicode above U+FFFF."},
+  {name:".localeCompare()",cat:"inspect",summary:"Compare strings for locale-aware sorting",desc:"Returns -1 (before), 0 (equal), or 1 (after) to indicate the sort order of two strings, respecting locale rules.",code:`// For Array.sort() — locale-aware alphabetical order:
+["ö","a","z","ä"].sort((a,b) => a.localeCompare(b));
+// ["a","ä","ö","z"]  ← correct German order!
+
+// Case-insensitive comparison:
+"hello".localeCompare("HELLO", "en", { sensitivity: "base" }); // 0`,tip:"Always use this for sorting user-facing strings — never plain < > which gives wrong results for accented characters."},
+  {name:".isWellFormed()",cat:"inspect",summary:"Check if string has valid Unicode (no lone surrogates)",desc:"Returns true if the string contains no lone surrogate characters. Lone surrogates can cause issues with encodeURI() and external systems.",code:`"hello 😀".isWellFormed();   // true
+"\\uD800".isWellFormed();       // false (lone surrogate)
+
+// Guard before encodeURI:
+if (!str.isWellFormed()) {
+  str = str.toWellFormed();
+}`,tip:"Check this before passing strings to encodeURI() or TextEncoder to avoid errors."},
+  {name:".toWellFormed()",cat:"inspect",summary:"Replace lone surrogates with the replacement character",desc:"Returns a new string where all lone surrogate characters are replaced with the Unicode replacement character U+FFFD (�). Makes the string safe for use with encodeURI() and external APIs.",code:`"\\uD800hello".toWellFormed(); // "\\uFFFDhello" (→ "hello" with replacement char)
+"hello 😀".toWellFormed();   // "hello 😀" (unchanged — already valid)`,tip:"Use this as a safe sanitiser before sending strings to external systems or URLs."},
+  {name:".valueOf()",cat:"inspect",summary:"Return the primitive string value of a String object",desc:"Returns the primitive string value of a String wrapper object. Rarely needed since JavaScript auto-unwraps String objects in most contexts.",code:`const strObj = new String("hello");
+strObj.valueOf(); // "hello" (primitive)
+typeof strObj;         // "object"
+typeof strObj.valueOf(); // "string"`,tip:"You'll almost never use this — it's mainly relevant when you explicitly use new String(), which you should avoid."},
+  {name:".toString()",cat:"inspect",summary:"Return the string value",desc:"Returns the string itself (for primitives) or the primitive value of a String object. Because String doesn't have [Symbol.toPrimitive], toString() is called automatically in string contexts.",code:`"hello".toString();             // "hello"
+new String("hello").toString(); // "hello"`,tip:"Rarely needed directly — JavaScript calls it automatically. More useful on numbers: (255).toString(16) → 'ff'"},
+];
 </script>
+<script src="js/ref-engine.js"></script>
+<script>buildFilters(CATS); renderRef();</script>
 </body>
 </html>
