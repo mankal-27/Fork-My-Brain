@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fork My Brain — Interactive JS Learning</title>
+<meta name="description" content="A growing collection of interactive JavaScript guides — Arrays, Strings, Promises, DOM and more. Learn by doing, not by reading.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/shared.css">
+<style>
+/* ── HOME-ONLY STYLES ── */
+.hero {
+  max-width: 1140px; margin: 0 auto;
+  padding: 6rem 1.5rem 4rem;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;
+}
+.hero-label {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 1.25rem;
+}
+.hero-h1 {
+  font-size: clamp(2.4rem, 5vw, 3.6rem); font-weight: 600;
+  line-height: 1.08; letter-spacing: -.03em; margin-bottom: 1.25rem;
+}
+.hero-h1 em { font-style: normal; color: var(--accent2); }
+.hero-p { font-size: 17px; color: var(--text2); line-height: 1.65; max-width: 420px; margin-bottom: 2rem; }
+.hero-cta { display: flex; gap: 10px; flex-wrap: wrap; }
+.hero-stat-row { display: flex; gap: 2rem; margin-top: 2.5rem; }
+.hero-stat-n { font-size: 28px; font-weight: 600; font-family: var(--mono); color: var(--accent2); }
+.hero-stat-l { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+/* terminal animation */
+.terminal { background: var(--bg2); border: 0.5px solid var(--border2); border-radius: var(--r-lg); overflow: hidden; }
+.term-bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 0.5px solid var(--border); background: var(--bg3); }
+.term-title { font-family: var(--mono); font-size: 12px; color: var(--text3); margin-left: 6px; }
+.term-body { padding: 1.25rem 1.5rem; font-family: var(--mono); font-size: 13px; line-height: 1.8; min-height: 220px; }
+.term-line { display: flex; align-items: flex-start; gap: 8px; opacity: 0; animation: fadeUp .3s ease forwards; }
+.term-prompt { color: var(--accent); flex-shrink: 0; }
+.term-cmd { color: var(--text); }
+.term-out { color: var(--green); padding-left: 18px; }
+.term-cursor { display: inline-block; width: 8px; height: 14px; background: var(--accent); border-radius: 2px; animation: blink 1s step-end infinite; vertical-align: middle; margin-left: 2px; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+/* ── MODULES SECTION ── */
+.modules-section { max-width: 1140px; margin: 0 auto; padding: 3rem 1.5rem 2rem; }
+.sec-label { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--text3); margin-bottom: .6rem; }
+.sec-h2 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; margin-bottom: 1.75rem; }
+
+.modules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+
+.module-card {
+  background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--r-lg);
+  padding: 1.5rem; display: flex; flex-direction: column; gap: 10px;
+  transition: border-color .2s, transform .2s, background .2s; position: relative; overflow: hidden;
+}
+.module-card::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse at top left, var(--card-glow,transparent) 0%, transparent 65%); pointer-events:none; opacity:0; transition: opacity .3s; }
+.module-card:hover { border-color: var(--card-border, var(--border2)); background: var(--bg3); transform: translateY(-3px); }
+.module-card:hover::before { opacity: 1; }
+.module-card.disabled { opacity: .45; pointer-events: none; }
+
+.module-card[data-color="purple"] { --card-border: rgba(124,111,247,.5); --card-glow: rgba(124,111,247,.08); }
+.module-card[data-color="teal"]   { --card-border: rgba(56,217,192,.4);  --card-glow: rgba(56,217,192,.07); }
+.module-card[data-color="amber"]  { --card-border: rgba(245,166,35,.4);  --card-glow: rgba(245,166,35,.07); }
+.module-card[data-color="green"]  { --card-border: rgba(34,201,138,.4);  --card-glow: rgba(34,201,138,.07); }
+.module-card[data-color="pink"]   { --card-border: rgba(232,112,176,.4); --card-glow: rgba(232,112,176,.07); }
+.module-card[data-color="red"]    { --card-border: rgba(240,84,84,.4);   --card-glow: rgba(240,84,84,.07); }
+
+.mc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.mc-icon { font-size: 1.75rem; line-height: 1; }
+.mc-status { font-family: var(--mono); font-size: 10px; padding: 3px 8px; border-radius: 99px; }
+.mc-status.live { background: var(--green-bg); color: var(--green); border: 0.5px solid rgba(34,201,138,.3); }
+.mc-status.soon { background: var(--bg4); color: var(--text3); border: 0.5px solid var(--border); }
+.mc-status.wip  { background: var(--amber-bg); color: var(--amber); border: 0.5px solid rgba(245,166,35,.3); }
+
+.mc-name { font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
+.mc-desc { font-size: 13px; color: var(--text2); line-height: 1.55; }
+.mc-methods { display: flex; flex-wrap: wrap; gap: 5px; }
+.mc-methods code { font-family: var(--mono); font-size: 11px; background: var(--bg4); color: var(--text2); padding: 2px 7px; border-radius: 5px; border: 0.5px solid var(--border); }
+.mc-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+.mc-count { font-family: var(--mono); font-size: 12px; color: var(--text3); }
+.mc-arrow { font-size: 16px; color: var(--text3); transition: transform .2s, color .2s; }
+.module-card:hover .mc-arrow { transform: translateX(3px); color: var(--text); }
+
+/* ── ROADMAP ── */
+.roadmap-section { max-width: 1140px; margin: 0 auto; padding: 2rem 1.5rem; }
+.roadmap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 1.5rem; }
+.roadmap-item { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--r); padding: 12px 14px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text2); }
+.roadmap-item .ri-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.roadmap-item .ri-dot.done  { background: var(--green); }
+.roadmap-item .ri-dot.wip   { background: var(--amber); }
+.roadmap-item .ri-dot.soon  { background: var(--text3); }
+
+/* ── HOW TO CONTRIBUTE ── */
+.contribute-section { max-width: 1140px; margin: 0 auto; padding: 3rem 1.5rem; }
+.steps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin-top: 1.5rem; }
+.step-card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--r); padding: 1.25rem; }
+.step-n { font-family: var(--mono); font-size: 11px; color: var(--accent); margin-bottom: .5rem; }
+.step-title { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+.step-desc { font-size: 13px; color: var(--text2); line-height: 1.55; }
+.step-code { font-family: var(--mono); font-size: 12px; background: var(--bg3); border: 0.5px solid var(--border); border-radius: 6px; padding: 6px 10px; margin-top: 8px; color: var(--teal); white-space: pre; overflow-x: auto; }
+
+@media (max-width: 860px) {
+  .hero { grid-template-columns: 1fr; padding-top: 3.5rem; }
+  .terminal { display: none; }
+}
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">🧠</div>
+      <span class="nav-logo-text">Fork<span>MyBrain</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link active">Home</a>
+      <a href="js-array-guide/index.html" class="nav-link">Arrays</a>
+    </div>
+    <a href="https://github.com/mankal-27/Fork-My-Brain" target="_blank" rel="noopener" class="nav-gh">★ GitHub</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-label">Interactive JavaScript Learning</div>
+    <h1 class="hero-h1">Your local brain,<br><em>forked to the web</em></h1>
+    <p class="hero-p">No courses. No paywalls. Just clean, animated, real-world examples for every JavaScript concept — growing one module at a time.</p>
+    <div class="hero-cta">
+      <a href="js-array-guide/index.html" class="btn btn-primary">Start with Arrays →</a>
+      <a href="https://github.com/mankal-27/Fork-My-Brain" target="_blank" rel="noopener" class="btn btn-ghost">View on GitHub</a>
+    </div>
+    <div class="hero-stat-row">
+      <div>
+        <div class="hero-stat-n" id="stat-methods">37+</div>
+        <div class="hero-stat-l">methods covered</div>
+      </div>
+      <div>
+        <div class="hero-stat-n">5</div>
+        <div class="hero-stat-l">real-world scenarios</div>
+      </div>
+      <div>
+        <div class="hero-stat-n" id="stat-modules">1</div>
+        <div class="hero-stat-l">module live</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="terminal">
+    <div class="term-bar">
+      <span class="dot dot-r"></span><span class="dot dot-a"></span><span class="dot dot-g"></span>
+      <span class="term-title">fork-my-brain ~ interactive</span>
+    </div>
+    <div class="term-body" id="term-body">
+    </div>
+  </div>
+</section>
+
+<!-- MODULES -->
+<section class="modules-section">
+  <div class="sec-label">All modules</div>
+  <h2 class="sec-h2">Pick a topic, start learning</h2>
+  <div class="modules-grid">
+
+    <a href="js-array-guide/index.html" class="module-card" data-color="purple">
+      <div class="mc-top">
+        <div class="mc-icon">📦</div>
+        <span class="mc-status live">Live</span>
+      </div>
+      <div class="mc-name">Array Methods</div>
+      <div class="mc-desc">All 37 instance methods + 4 static methods. Animated scenarios: shopping cart, music playlist, delivery queue.</div>
+      <div class="mc-methods">
+        <code>push</code><code>map</code><code>filter</code><code>reduce</code><code>find</code><code>splice</code>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-count">41 methods · 5 scenarios</span>
+        <span class="mc-arrow">→</span>
+      </div>
+    </a>
+
+    <div class="module-card" data-color="teal" style="opacity:.5;cursor:not-allowed">
+      <div class="mc-top">
+        <div class="mc-icon">🔤</div>
+        <span class="mc-status wip">Coming soon</span>
+      </div>
+      <div class="mc-name">String Methods</div>
+      <div class="mc-desc">From slice() to matchAll() — with real scenarios like form validation, text parsing, and URL building.</div>
+      <div class="mc-methods">
+        <code>split</code><code>replace</code><code>match</code><code>trim</code><code>includes</code>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-count">32 methods · 5 scenarios</span>
+        <span class="mc-arrow">→</span>
+      </div>
+    </div>
+
+    <div class="module-card" data-color="amber" style="opacity:.5;cursor:not-allowed">
+      <div class="mc-top">
+        <div class="mc-icon">🔁</div>
+        <span class="mc-status soon">Planned</span>
+      </div>
+      <div class="mc-name">Promises &amp; Async</div>
+      <div class="mc-desc">Promise.all, async/await, error handling — animated with real API call simulations.</div>
+      <div class="mc-methods">
+        <code>async</code><code>await</code><code>Promise.all</code><code>catch</code>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-count">Planned</span>
+        <span class="mc-arrow">→</span>
+      </div>
+    </div>
+
+    <div class="module-card" data-color="green" style="opacity:.5;cursor:not-allowed">
+      <div class="mc-top">
+        <div class="mc-icon">🌐</div>
+        <span class="mc-status soon">Planned</span>
+      </div>
+      <div class="mc-name">DOM Manipulation</div>
+      <div class="mc-desc">querySelector, events, classList — visualised live on a mini page preview inside the browser.</div>
+      <div class="mc-methods">
+        <code>querySelector</code><code>addEventListener</code><code>classList</code>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-count">Planned</span>
+        <span class="mc-arrow">→</span>
+      </div>
+    </div>
+
+    <div class="module-card" data-color="pink" style="opacity:.5;cursor:not-allowed">
+      <div class="mc-top">
+        <div class="mc-icon">🗺️</div>
+        <span class="mc-status soon">Planned</span>
+      </div>
+      <div class="mc-name">Map &amp; Set</div>
+      <div class="mc-desc">The underused siblings of Array — for deduplication, key-value lookups, and fast existence checks.</div>
+      <div class="mc-methods">
+        <code>Map.set</code><code>Set.has</code><code>Map.entries</code>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-count">Planned</span>
+        <span class="mc-arrow">→</span>
+      </div>
+    </div>
+
+    <div class="module-card" data-color="red" style="opacity:.5;cursor:not-allowed">
+      <div class="mc-top">
+        <div class="mc-icon">🔢</div>
+        <span class="mc-status soon">Planned</span>
+      </div>
+      <div class="mc-name">Object Methods</div>
+      <div class="mc-desc">Object.keys, values, entries, assign, freeze — with real data transformation walkthroughs.</div>
+      <div class="mc-methods">
+        <code>Object.keys</code><code>Object.assign</code><code>spread</code>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-count">Planned</span>
+        <span class="mc-arrow">→</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section class="roadmap-section">
+  <div class="sec-label">Roadmap</div>
+  <h2 class="sec-h2">What's next</h2>
+  <div class="roadmap-grid">
+    <div class="roadmap-item"><span class="ri-dot done"></span>Array Methods (41 methods)</div>
+    <div class="roadmap-item"><span class="ri-dot wip"></span>String Methods</div>
+    <div class="roadmap-item"><span class="ri-dot soon"></span>Promises &amp; Async/Await</div>
+    <div class="roadmap-item"><span class="ri-dot soon"></span>DOM Manipulation</div>
+    <div class="roadmap-item"><span class="ri-dot soon"></span>Map &amp; Set</div>
+    <div class="roadmap-item"><span class="ri-dot soon"></span>Object Methods</div>
+    <div class="roadmap-item"><span class="ri-dot soon"></span>Regex</div>
+    <div class="roadmap-item"><span class="ri-dot soon"></span>Destructuring &amp; Spread</div>
+    <div class="roadmap-item"><span class="ri-dot soon"></span>Error Handling</div>
+    <div class="roadmap-item"><span class="ri-dot soon"></span>Closures &amp; Scope</div>
+    <div class="roadmap-item"><span class="ri-dot soon"></span>Prototype &amp; Classes</div>
+    <div class="roadmap-item"><span class="ri-dot soon"></span>Web APIs (Fetch, Storage)</div>
+  </div>
+</section>
+
+<!-- HOW TO ADD A MODULE -->
+<section class="contribute-section">
+  <div class="sec-label">Contribute</div>
+  <h2 class="sec-h2">Adding a new module</h2>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-n">step 01</div>
+      <div class="step-title">Create a folder</div>
+      <div class="step-desc">Each topic lives in its own folder at the repo root.</div>
+      <div class="step-code">Fork-My-Brain/
+├── js-array-guide/
+├── js-string-guide/   ← new
+└── index.html</div>
+    </div>
+    <div class="step-card">
+      <div class="step-n">step 02</div>
+      <div class="step-title">Copy the template</div>
+      <div class="step-desc">Duplicate <code>js-array-guide/</code> and replace the scenario data in <code>js/scenarios.js</code>.</div>
+      <div class="step-code">cp -r js-array-guide \
+   js-string-guide</div>
+    </div>
+    <div class="step-card">
+      <div class="step-n">step 03</div>
+      <div class="step-title">Add the card here</div>
+      <div class="step-desc">Add a new <code>.module-card</code> in <code>index.html</code> and set status to <code>Live</code>.</div>
+      <div class="step-code">&lt;!-- status: live / wip / soon --&gt;
+&lt;span class="mc-status live"&gt;
+  Live
+&lt;/span&gt;</div>
+    </div>
+    <div class="step-card">
+      <div class="step-n">step 04</div>
+      <div class="step-title">Push &amp; deploy</div>
+      <div class="step-desc">GitHub Pages auto-deploys from main. No build step needed — pure HTML/CSS/JS.</div>
+      <div class="step-code">git add .
+git commit -m "add string guide"
+git push</div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span class="nav-logo-text" style="font-family:var(--mono);font-size:14px">Fork<span style="color:var(--accent2)">MyBrain</span></span>
+    <span class="footer-copy">Built by mankal-27 · local brain to the global web</span>
+    <a href="https://github.com/mankal-27/Fork-My-Brain" target="_blank" rel="noopener" class="footer-link">GitHub ↗</a>
+    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" rel="noopener" class="footer-link">MDN Docs ↗</a>
+  </div>
+</footer>
+
+<script>
+const lines = [
+  { type:'cmd',  text:"import { learn } from 'fork-my-brain'" },
+  { type:'out',  text:"✓ 41 array methods loaded" },
+  { type:'cmd',  text:"const cart = ['Shoes','Hat','Socks']" },
+  { type:'cmd',  text:"cart.filter(item => item.price < 500)" },
+  { type:'out',  text:"→ ['Hat', 'Socks']" },
+  { type:'cmd',  text:"cart.map(i => ({ ...i, sale: true }))" },
+  { type:'out',  text:"→ 3 items with sale: true" },
+  { type:'cmd',  text:"cart.reduce((sum, i) => sum + i.price, 0)" },
+  { type:'out',  text:"→ ₹3,846" },
+  { type:'cursor', text:'' },
+];
+
+const body = document.getElementById('term-body');
+let delay = 0;
+lines.forEach((line, i) => {
+  const el = document.createElement('div');
+  el.className = 'term-line';
+  el.style.animationDelay = delay + 'ms';
+  if (line.type === 'cmd') {
+    el.innerHTML = `<span class="term-prompt">❯</span><span class="term-cmd">${line.text}</span>`;
+    delay += 600;
+  } else if (line.type === 'out') {
+    el.innerHTML = `<span class="term-out">${line.text}</span>`;
+    delay += 350;
+  } else {
+    el.innerHTML = `<span class="term-prompt">❯</span><span class="term-cursor"></span>`;
+    delay += 400;
+  }
+  body.appendChild(el);
+});
+</script>
+
+</body>
+</html>

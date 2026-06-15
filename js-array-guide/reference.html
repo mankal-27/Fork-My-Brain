@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reference — JS Array Methods</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav-inner">
+    <a href="../index.html" class="logo"><span class="logo-bracket">[</span>JS<span class="logo-accent">Arrays</span><span class="logo-bracket">]</span></a>
+    <div class="nav-links"><a href="../index.html" class="nav-link" style="color:var(--text3);font-size:12px">← Hub</a>
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="playground.html" class="nav-link">Playground</a>
+      <a href="reference.html" class="nav-link active">Reference</a>
+    </div>
+  </nav>
+</header>
+
+<div class="ref-layout">
+  <div class="ref-hero">
+    <div class="ref-title">Complete reference</div>
+    <div class="ref-sub">All 41 Array methods — static, instance, and ES2023 additions.</div>
+  </div>
+
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="q" placeholder="Search methods, e.g. filter, push, find…" oninput="render()">
+  </div>
+
+  <div class="ref-filters" id="filters"></div>
+  <div class="ref-count" id="count"></div>
+  <div id="list"></div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <a href="../index.html" class="logo"><span class="logo-bracket">[</span>JS<span class="logo-accent">Arrays</span><span class="logo-bracket">]</span></a>
+    <span class="footer-note">Built for learning · Open source</span>
+    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank" rel="noopener" class="footer-link">MDN Docs ↗</a>
+  </div>
+</footer>
+
+<script>
+const METHODS = [
+  {name:"Array.from()",cat:"static",summary:"Create array from iterable or array-like object",desc:"Converts any iterable (Set, Map, string, NodeList) or array-like object into a real Array. Accepts an optional mapping function as the second argument.",code:`Array.from("hello");                      // ['h','e','l','l','o']
+Array.from(new Set([1,2,2,3]));           // [1,2,3]
+Array.from({length:5}, (_, i) => i * 2); // [0,2,4,6,8]`,tip:"Great alternative to [...iterable] when you also want to transform."},
+  {name:"Array.fromAsync()",cat:"static",summary:"Create array from an async iterable",desc:"Like Array.from() but works with async iterables (async generators, ReadableStream). Returns a Promise.",code:`async function* gen() { yield 1; yield 2; yield 3; }
+const arr = await Array.fromAsync(gen()); // [1, 2, 3]`,tip:"Useful for consuming async data streams into arrays."},
+  {name:"Array.isArray()",cat:"static",summary:"Check whether a value is an Array",desc:"Returns true if the argument is an Array, false otherwise. More reliable than instanceof for cross-realm checks.",code:`Array.isArray([1, 2, 3]);      // true
+Array.isArray("hello");        // false
+Array.isArray({ length: 3 });  // false`,tip:"Always prefer this over typeof or instanceof when checking for arrays."},
+  {name:"Array.of()",cat:"static",summary:"Create array from arguments — fixes new Array(n) quirk",desc:"Creates a new Array with the provided arguments as elements. Fixes the confusing behaviour of new Array(n) which creates empty slots.",code:`Array.of(7);        // [7]  ← one element!
+new Array(7);       // [,,,,,,,] ← 7 empty slots ⚠️
+Array.of(1, 2, 3); // [1, 2, 3]`,tip:"Use Array.of() when you want to create an array with a single number."},
+  {name:".at()",cat:"search",summary:"Get element by index — supports negative indices",desc:"Returns the element at the given index. Accepts negative integers counting from the end (-1 = last element).",code:`const arr = ['a', 'b', 'c', 'd'];
+arr.at(0);   // 'a'
+arr.at(-1);  // 'd'  ← last element
+arr.at(-2);  // 'c'`,tip:"Cleaner than arr[arr.length - 1] for the last element."},
+  {name:".concat()",cat:"copy",summary:"Merge arrays into a new array",desc:"Returns a new array by joining the calling array with other arrays or values. Does NOT mutate the originals.",code:`const a = [1, 2];
+const b = [3, 4];
+a.concat(b);         // [1, 2, 3, 4]
+a.concat(b, [5, 6]); // [1, 2, 3, 4, 5, 6]
+a.concat(99);        // [1, 2, 99]`,tip:"Spread syntax [...a, ...b] is a popular modern alternative."},
+  {name:".copyWithin()",cat:"mutates",summary:"Copy part of array to another position in-place",desc:"Copies a sequence of elements within the array to another position, overwriting existing values. Mutates and returns the original.",code:`[1, 2, 3, 4, 5].copyWithin(1, 3);   // [1, 4, 5, 4, 5]
+[1, 2, 3, 4, 5].copyWithin(0, 3, 4); // [4, 2, 3, 4, 5]`,tip:"Mainly useful for performance-critical typed array operations."},
+  {name:".entries()",cat:"iter",summary:"Iterate as [index, value] pairs",desc:"Returns an iterator of [index, value] pairs for every element.",code:`const arr = ['a', 'b', 'c'];
+for (const [i, v] of arr.entries()) {
+  console.log(i, v); // 0 'a', 1 'b', 2 'c'
+}`,tip:"Use when you need both the index and value inside a for...of loop."},
+  {name:".every()",cat:"iter",summary:"Test if ALL elements pass a condition",desc:"Returns true if the callback returns true for every element. Short-circuits on first failure.",code:`[2, 4, 6].every(n => n % 2 === 0);  // true
+[2, 4, 5].every(n => n % 2 === 0);  // false — 5 fails
+[].every(() => false);               // true (vacuously true)`,tip:"Think of it as logical AND across all elements."},
+  {name:".fill()",cat:"mutates",summary:"Fill elements with a static value",desc:"Fills all or part of an array with a static value in-place. Mutates and returns the original array.",code:`[1,2,3,4,5].fill(0);          // [0, 0, 0, 0, 0]
+[1,2,3,4,5].fill(9, 2, 4);   // [1, 2, 9, 9, 5]
+new Array(5).fill(0);          // [0, 0, 0, 0, 0]`,tip:"Warning: filling with an object fills every slot with the SAME reference."},
+  {name:".filter()",cat:"copy",summary:"Return new array with only matching elements",desc:"Creates a new array with all elements for which the callback returns true. Does NOT mutate the original.",code:`[1,2,3,4,5,6].filter(n => n % 2 === 0); // [2, 4, 6]
+['a','bb','ccc'].filter(w => w.length > 1); // ['bb','ccc']
+[0, 1, '', 'hi', null].filter(Boolean);    // [1, 'hi']`,tip:".filter(Boolean) is a handy idiom to remove all falsy values."},
+  {name:".find()",cat:"search",summary:"Return first element matching a condition",desc:"Returns the value of the first element that satisfies the test, or undefined. Stops as soon as it finds a match.",code:`const users = [{id:1,name:'Alice'},{id:2,name:'Bob'}];
+users.find(u => u.id === 2);       // {id:2, name:'Bob'}
+users.find(u => u.name === 'Eve'); // undefined`,tip:"Use .find() for the element itself, .findIndex() for its position."},
+  {name:".findIndex()",cat:"search",summary:"Return index of first matching element",desc:"Returns the index of the first element that satisfies the test, or -1.",code:`[10,20,30,40].findIndex(n => n > 25); // 2 (value is 30)
+[10,20,30].findIndex(n => n > 100);  // -1`,tip:"Always check for -1 to handle the case when nothing is found."},
+  {name:".findLast()",cat:"search",summary:"Return last element matching a condition (ES2023)",desc:"Like .find() but searches from right to left, returning the last matching element.",code:`[1, 2, 3, 4, 5].findLast(n => n % 2 === 0); // 4 (not 2)`,tip:"Added in ES2023 — check browser support for older environments."},
+  {name:".findLastIndex()",cat:"search",summary:"Return index of last matching element (ES2023)",desc:"Like .findIndex() but searches from right to left.",code:`[1, 2, 3, 4, 3].findLastIndex(n => n === 3); // 4 (not 2)`,tip:"Useful when the match you want is closer to the end."},
+  {name:".flat()",cat:"copy",summary:"Flatten nested arrays by depth",desc:"Creates a new array with sub-arrays flattened to the given depth (default 1). Does not mutate.",code:`[1,[2,3],[4,[5,6]]].flat();         // [1,2,3,4,[5,6]]
+[1,[2,3],[4,[5,6]]].flat(2);        // [1,2,3,4,5,6]
+[1,[2,3],[4,[5,6]]].flat(Infinity); // [1,2,3,4,5,6]`,tip:"Use Infinity as depth to fully flatten regardless of nesting level."},
+  {name:".flatMap()",cat:"copy",summary:"Map then flatten one level — more efficient than .map().flat()",desc:"Maps each element with the callback then flattens the result one level. More efficient than chaining .map().flat().",code:`['Hello world','Foo bar'].flatMap(s => s.split(' '));
+// ['Hello','world','Foo','bar']
+
+[1, 2, 3].flatMap(n => n > 1 ? [n, n * 10] : []);
+// [2, 20, 3, 30]`,tip:"flatMap only flattens one level — use flat(Infinity) for deeper nesting."},
+  {name:".forEach()",cat:"iter",summary:"Execute a function for each element",desc:"Calls the callback for each element. Always returns undefined — cannot be stopped early.",code:`['apple','banana'].forEach((fruit, index) => {
+  console.log(index, fruit); // 0 'apple', 1 'banana'
+});`,tip:"Use .map() instead if you need a transformed array back."},
+  {name:".includes()",cat:"search",summary:"Check if array contains a value",desc:"Returns true if the value exists. Uses SameValueZero equality — can find NaN unlike indexOf.",code:`[1, 2, NaN].includes(2);   // true
+[1, 2, NaN].includes(NaN); // true  ✓ (indexOf can't do this!)
+[1, 2].includes(5, 1);    // false (search from index 1)`,tip:".includes() can find NaN; .indexOf() cannot."},
+  {name:".indexOf()",cat:"search",summary:"Find first index of a value",desc:"Returns the first index where the value is found using strict equality (===), or -1.",code:`['a','b','c','b'].indexOf('b');    // 1 (first occurrence)
+['a','b','c','b'].indexOf('z');    // -1 (not found)
+['a','b','c','b'].indexOf('b', 2); // 3 (search from index 2)`,tip:"For objects, use .findIndex() instead since === won't match by content."},
+  {name:".join()",cat:"other",summary:"Join all elements into a string",desc:"Creates a string by joining all elements with the given separator (default comma).",code:`['Hello','world'].join(' ');      // 'Hello world'
+[1, 2, 3].join(' + ');           // '1 + 2 + 3'
+['a', null, 'b'].join('-');      // 'a--b'`,tip:"The reverse operation is string.split(separator)."},
+  {name:".keys()",cat:"iter",summary:"Iterate over indices of an array",desc:"Returns an iterator of the array's indices.",code:`[...['a','b','c'].keys()]; // [0, 1, 2]
+[...Array(5).keys()];      // [0, 1, 2, 3, 4]  ← handy range!`,tip:"[...Array(n).keys()] is a one-liner to generate a number range."},
+  {name:".lastIndexOf()",cat:"search",summary:"Find last index of a value",desc:"Returns the last index where the value is found (searching right to left), or -1.",code:`['a','b','c','b','a'].lastIndexOf('b'); // 3 (not 1)
+['a','b'].lastIndexOf('z');             // -1`,tip:"Use when you want the rightmost occurrence of a value."},
+  {name:".map()",cat:"copy",summary:"Transform each element into a new array",desc:"Creates a new array of the same length with each element transformed by the callback. Does NOT mutate.",code:`[1,2,3,4].map(n => n * 2);        // [2, 4, 6, 8]
+[{name:'Alice'},{name:'Bob'}].map(u => u.name); // ['Alice','Bob']
+['a','b','c'].map((v,i) => i+':'+v); // ['0:a','1:b','2:c']`,tip:"Always returns same length array. Use .filter() to change the count."},
+  {name:".pop()",cat:"mutates",summary:"Remove and return the last element",desc:"Removes the last element from an array and returns it. Mutates the array.",code:`const arr = ['a','b','c'];
+arr.pop(); // returns 'c'
+// arr is now ['a','b']`,tip:"Non-mutating alternative: arr.slice(0, -1)"},
+  {name:".push()",cat:"mutates",summary:"Add elements to the end; return new length",desc:"Appends one or more elements to the end and returns the new length.",code:`const arr = ['a','b'];
+arr.push('c');      // returns 3, arr = ['a','b','c']
+arr.push('d','e'); // returns 5`,tip:"To add to the beginning instead, use .unshift()."},
+  {name:".reduce()",cat:"iter",summary:"Reduce to a single value (left to right)",desc:"Runs a reducer callback on each element from left to right, accumulating a result. Always provide an initial value.",code:`[1,2,3,4].reduce((acc, n) => acc + n, 0);  // 10 (sum)
+[1,2,3,4].reduce((acc, n) => acc * n, 1);  // 24 (product)
+['a','b','a'].reduce((acc, v) => {
+  acc[v] = (acc[v]||0)+1; return acc;
+}, {}); // {a:2, b:1}`,tip:"Always provide an initial value to avoid errors on empty arrays."},
+  {name:".reduceRight()",cat:"iter",summary:"Reduce from right to left",desc:"Same as .reduce() but processes the array from right to left.",code:`[[1,2],[3,4],[5,6]].reduceRight((acc, v) => acc.concat(v), []);
+// [5,6,3,4,1,2]`,tip:"Useful for right-to-left function composition."},
+  {name:".reverse()",cat:"mutates",summary:"Reverse array in-place",desc:"Reverses the order of elements in-place. Mutates and returns the original.",code:`const arr = [1,2,3,4,5];
+arr.reverse(); // arr is now [5,4,3,2,1]
+
+'hello'.split('').reverse().join(''); // 'olleh'`,tip:"Use .toReversed() for a non-mutating copy instead."},
+  {name:".shift()",cat:"mutates",summary:"Remove and return the first element",desc:"Removes the first element and returns it. All remaining elements shift down by one.",code:`const arr = ['a','b','c'];
+arr.shift(); // returns 'a'
+// arr is now ['b','c']`,tip:"shift() is O(n) — for large queues consider a pointer-based approach."},
+  {name:".slice()",cat:"copy",summary:"Extract a portion as a new array",desc:"Returns a shallow copy of a portion from start to end (exclusive). Does NOT mutate.",code:`['a','b','c','d','e'].slice(1, 3); // ['b','c']
+['a','b','c','d','e'].slice(2);    // ['c','d','e']
+['a','b','c','d','e'].slice(-2);   // ['d','e']
+['a','b','c'].slice();             // ['a','b','c'] ← copy`,tip:"arr.slice() with no arguments is a quick shallow copy."},
+  {name:".some()",cat:"iter",summary:"Test if AT LEAST ONE element passes",desc:"Returns true if at least one element passes the test. Short-circuits on first match.",code:`[1,3,5,7,8].some(n => n % 2 === 0); // true  — 8 is even
+[1,3,5,7].some(n => n % 2 === 0);   // false
+[].some(() => true);                 // false`,tip:"Think of it as logical OR across all elements."},
+  {name:".sort()",cat:"mutates",summary:"Sort elements in-place",desc:"Sorts in-place and returns the sorted array. Default is lexicographic — always pass a comparator for numbers.",code:`[10,9,2,100].sort();             // [10,100,2,9] ⚠️ WRONG for numbers!
+[10,9,2,100].sort((a,b)=>a-b);  // [2,9,10,100] ✓ ascending
+[10,9,2,100].sort((a,b)=>b-a);  // [100,10,9,2] ✓ descending`,tip:"Always pass a comparator for numbers! Default sort is alphabetical."},
+  {name:".splice()",cat:"mutates",summary:"Add, remove, or replace elements at any position",desc:"The most versatile mutation method. Returns removed elements.",code:`const arr = ['a','b','c','d'];
+arr.splice(1, 2);         // removes ['b','c'], arr=['a','d']
+arr.splice(1, 0, 'X');   // inserts 'X', arr=['a','X','d']
+arr.splice(1, 1, 'Z');   // replaces, arr=['a','Z','d']`,tip:"splice(start, deleteCount, ...itemsToInsert). Returns removed items."},
+  {name:".toLocaleString()",cat:"other",summary:"Convert to locale-specific string",desc:"Returns elements formatted according to locale and options.",code:`[1000,2500].toLocaleString('en-IN',{style:'currency',currency:'INR'});
+// '₹1,000.00,₹2,500.00'`,tip:"Great for displaying monetary values in the user's local format."},
+  {name:".toReversed()",cat:"copy",summary:"Return reversed copy — non-mutating (ES2023)",desc:"Returns a new reversed array without modifying the original.",code:`const arr = [1,2,3];
+arr.toReversed(); // [3,2,1]
+// arr is still [1,2,3]`,tip:"Prefer this over .reverse() to keep the original intact."},
+  {name:".toSorted()",cat:"copy",summary:"Return sorted copy — non-mutating (ES2023)",desc:"Returns a new sorted array without mutating the original.",code:`const arr = [3,1,4,1,5];
+arr.toSorted((a,b)=>a-b); // [1,1,3,4,5]
+// arr is still [3,1,4,1,5]`,tip:"Use this in React/functional patterns where immutability matters."},
+  {name:".toSpliced()",cat:"copy",summary:"Return spliced copy — non-mutating (ES2023)",desc:"Returns a new array with splicing applied, without mutating the original.",code:`const arr = ['a','b','c','d'];
+arr.toSpliced(1,1);       // ['a','c','d']
+arr.toSpliced(2,0,'X');   // ['a','b','X','c','d']
+// arr is unchanged!`,tip:"Great for immutable state updates in React."},
+  {name:".toString()",cat:"other",summary:"Convert to comma-separated string",desc:"Returns elements joined by commas. Equivalent to .join(',').",code:`[1,2,3].toString();       // '1,2,3'
+[[1,2],[3,4]].toString(); // '1,2,3,4'`,tip:"Use .join(separator) when you need a custom separator."},
+  {name:".unshift()",cat:"mutates",summary:"Add elements to the beginning; return new length",desc:"Adds one or more elements to the beginning. Returns the new length.",code:`const arr = ['c','d'];
+arr.unshift('a','b'); // returns 4
+// arr is ['a','b','c','d']`,tip:"Non-mutating alternative: [newItem, ...arr]"},
+  {name:".values()",cat:"iter",summary:"Iterate over values of an array",desc:"Returns an iterator of element values.",code:`[...['a','b','c'].values()]; // ['a','b','c']
+for (const v of arr.values()) { console.log(v); }`,tip:"Rarely needed directly — for...of uses this iterator implicitly."},
+  {name:".with()",cat:"copy",summary:"Return copy with one element replaced (ES2023)",desc:"Returns a new array with the element at the given index replaced. Negative indices work too.",code:`const arr = ['a','b','c','d'];
+arr.with(1, 'Z');   // ['a','Z','c','d']
+arr.with(-1, 'Z');  // ['a','b','c','Z']
+// arr unchanged!`,tip:"Clean replacement for the verbose slice + spread pattern."},
+];
+
+const CATS = [
+  {key:"all",label:"All"},
+  {key:"static",label:"Static"},
+  {key:"mutates",label:"Mutates"},
+  {key:"copy",label:"New array"},
+  {key:"iter",label:"Iterative"},
+  {key:"search",label:"Search"},
+  {key:"other",label:"Other"},
+];
+
+let activeCat = "all";
+let openSet = new Set();
+
+function render() {
+  const q = document.getElementById("q").value.toLowerCase();
+  const filtered = METHODS.filter(m => {
+    const catMatch = activeCat === "all" || m.cat === activeCat;
+    const qMatch = !q || m.name.toLowerCase().includes(q) || m.summary.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q);
+    return catMatch && qMatch;
+  });
+  document.getElementById("count").textContent = `${filtered.length} method${filtered.length !== 1 ? "s" : ""}`;
+  document.getElementById("list").innerHTML = filtered.map(m => {
+    const open = openSet.has(m.name);
+    const escaped = m.code.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    return `<div class="method-card">
+      <div class="method-header" onclick="toggle('${m.name.replace(/'/g,"\\'")}')">
+        <span class="method-name">${m.name}</span>
+        <span class="method-badge ${m.cat}">${m.cat}</span>
+        <span class="method-summary">${m.summary}</span>
+        <span class="method-chevron${open?" open":""}">▾</span>
+      </div>
+      ${open ? `<div class="method-body">
+        <p class="method-desc">${m.desc}</p>
+        <div class="method-example">${escaped}</div>
+        <p class="method-tip">💡 ${m.tip}</p>
+      </div>` : ""}
+    </div>`;
+  }).join("");
+}
+
+function toggle(name) {
+  if (openSet.has(name)) openSet.delete(name);
+  else openSet.add(name);
+  render();
+}
+
+const filtersEl = document.getElementById("filters");
+CATS.forEach(c => {
+  const el = document.createElement("button");
+  el.className = "ref-pill" + (c.key === "all" ? " active" : "");
+  el.textContent = c.label;
+  el.onclick = () => {
+    activeCat = c.key;
+    document.querySelectorAll(".ref-pill").forEach(p => p.classList.remove("active"));
+    el.classList.add("active");
+    render();
+  };
+  filtersEl.appendChild(el);
+});
+
+render();
+</script>
+</body>
+</html>

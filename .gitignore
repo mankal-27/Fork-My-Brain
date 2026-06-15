@@ -1,0 +1,98 @@
+# ── OS files ──────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ── Editor & IDE ──────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ── Node / npm (if you ever add a build step) ─────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.npm
+.yarn/
+
+# ── Build output (for future tooling) ─────────────────────
+dist/
+build/
+out/
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.vite/
+
+# ── Environment & secrets ─────────────────────────────────
+.env
+.env.local
+.env.development
+.env.staging
+.env.production
+.env.*.local
+*.pem
+*.key
+secrets/
+credentials/
+
+# ── Logs ──────────────────────────────────────────────────
+logs/
+*.log
+*.log.*
+
+# ── Test & coverage ───────────────────────────────────────
+coverage/
+.nyc_output/
+*.lcov
+test-results/
+playwright-report/
+cypress/videos/
+cypress/screenshots/
+
+# ── Temp / draft files ────────────────────────────────────
+tmp/
+temp/
+draft/
+*.draft.*
+*.bak
+*.backup
+*.tmp
+*.orig
+
+# ── Archive / zip (don't commit zips of the project) ──────
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ── Jekyll build output (GitHub Pages builds this itself) ──
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+
+# ── Misc ──────────────────────────────────────────────────
+.vercel
+.netlify

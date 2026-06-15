@@ -1,0 +1,9 @@
+title: Fork My Brain
+description: Interactive JavaScript learning — local brain to the global web.
+url: "https://mankal-27.github.io"
+baseurl: "/Fork-My-Brain"
+
+plugins: []
+exclude:
+  - README.md
+  - "*.sh"
