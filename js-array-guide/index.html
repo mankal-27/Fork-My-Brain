@@ -3,166 +3,76 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JS Array Methods — Learn by Doing</title>
-<meta name="description" content="Master every JavaScript Array method through real-world animated scenarios. Interactive examples with shopping carts, playlists, queues, and more.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
+<title>JS Array Methods — Fork My Brain</title>
+<meta name="description" content="Every JavaScript Array method with animated real-world scenarios.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <header class="site-header">
   <nav class="nav-inner">
-    <a href="../index.html" class="logo"><span class="logo-bracket">[</span>JS<span class="logo-accent">Arrays</span><span class="logo-bracket">]</span></a>
-    <div class="nav-links"><a href="../index.html" class="nav-link" style="color:var(--text3);font-size:12px">← Hub</a>
-      <a href="index.html" class="nav-link active">Home</a>
+    <a href="../index.html" class="logo" style="color:var(--text2);font-size:13px">← Hub</a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link active">Array Methods</a>
       <a href="playground.html" class="nav-link">Playground</a>
       <a href="reference.html" class="nav-link">Reference</a>
     </div>
   </nav>
 </header>
-
 <main>
-
   <section class="hero">
-    <div class="hero-eyebrow">JavaScript · Arrays · Interactive</div>
-    <h1 class="hero-title">Array methods,<br><span class="hero-accent">explained for humans</span></h1>
-    <p class="hero-sub">Every built-in array method — illustrated with real scenarios like shopping carts, music playlists, and delivery queues. No dry theory, just code you can feel.</p>
+    <div class="hero-eyebrow">JavaScript · Array Methods · Interactive</div>
+    <h1 class="hero-title">Array Methods,<br><span class="hero-accent">explained for humans</span></h1>
+    <p class="hero-sub">All 41 Array methods illustrated with real scenarios — shopping carts, playlists, delivery queues. No dry theory.</p>
     <div class="hero-cta">
       <a href="playground.html" class="btn-primary">Try the playground</a>
       <a href="reference.html" class="btn-secondary">Browse all methods</a>
     </div>
     <div class="hero-code">
       <div class="code-window">
-        <div class="code-toolbar">
-          <span class="dot dot-red"></span><span class="dot dot-amber"></span><span class="dot dot-green"></span>
-          <span class="code-filename">example.js</span>
-        </div>
+        <div class="code-toolbar"><span class="dot-red"></span><span class="dot-amber"></span><span class="dot-green"></span><span class="code-filename">example.js</span></div>
         <pre class="code-body"><span class="c-comment">// Real problems, real methods</span>
 <span class="c-kw">const</span> cart = [
-  { name: <span class="c-str">'Shoes'</span>, price: <span class="c-num">2499</span> },
-  { name: <span class="c-str">'T-Shirt'</span>, price: <span class="c-num">799</span> },
-  { name: <span class="c-str">'Hat'</span>, price: <span class="c-num">399</span> },
+  { name: <span class="c-str">'Shoes'</span>,  price: <span class="c-num">2499</span> },
+  { name: <span class="c-str">'Hat'</span>,    price: <span class="c-num">399</span>  },
 ];
-
-<span class="c-comment">// Get only items under ₹1000</span>
-<span class="c-kw">const</span> budget = cart.<span class="c-method">filter</span>(item => item.price &lt; <span class="c-num">1000</span>);
-
-<span class="c-comment">// Apply 10% discount to everything</span>
-<span class="c-kw">const</span> sale = cart.<span class="c-method">map</span>(item => ({
-  ...item, price: item.price * <span class="c-num">0.9</span>
-}));
-
+<span class="c-comment">// Filter under ₹500</span>
+cart.<span class="c-method">filter</span>(i => i.price &lt; <span class="c-num">500</span>); <span class="c-comment">// [{Hat}]</span>
+<span class="c-comment">// Apply 10% discount</span>
+cart.<span class="c-method">map</span>(i => ({...i, price: i.price * <span class="c-num">0.9</span>}));
 <span class="c-comment">// Calculate total</span>
-<span class="c-kw">const</span> total = cart.<span class="c-method">reduce</span>((sum, item) => sum + item.price, <span class="c-num">0</span>);
-<span class="c-comment">// → ₹3,697</span></pre>
+cart.<span class="c-method">reduce</span>((s, i) => s + i.price, <span class="c-num">0</span>); <span class="c-comment">// 2898</span></pre>
       </div>
     </div>
   </section>
-
   <section class="scenarios-section">
     <div class="section-label">What you'll learn</div>
     <h2 class="section-title">5 real-world scenarios</h2>
-    <div class="scenario-grid">
-
-      <a href="playground.html?s=queue" class="scenario-card">
-        <div class="sc-icon">☕</div>
-        <div class="sc-name">Coffee shop queue</div>
-        <div class="sc-desc">Customers joining and leaving</div>
-        <div class="sc-methods">
-          <code>push</code><code>pop</code><code>shift</code><code>unshift</code>
-        </div>
-      </a>
-
-      <a href="playground.html?s=cart" class="scenario-card">
-        <div class="sc-icon">🛒</div>
-        <div class="sc-name">Shopping cart</div>
-        <div class="sc-desc">Filter, discount, and total</div>
-        <div class="sc-methods">
-          <code>filter</code><code>map</code><code>reduce</code>
-        </div>
-      </a>
-
-      <a href="playground.html?s=playlist" class="scenario-card">
-        <div class="sc-icon">🎵</div>
-        <div class="sc-name">Music playlist</div>
-        <div class="sc-desc">Sort, find, and navigate songs</div>
-        <div class="sc-methods">
-          <code>sort</code><code>reverse</code><code>find</code><code>at</code>
-        </div>
-      </a>
-
-      <a href="playground.html?s=students" class="scenario-card">
-        <div class="sc-icon">📚</div>
-        <div class="sc-name">Student grades</div>
-        <div class="sc-desc">Check, search, and flatten data</div>
-        <div class="sc-methods">
-          <code>every</code><code>some</code><code>includes</code><code>flat</code>
-        </div>
-      </a>
-
-      <a href="playground.html?s=delivery" class="scenario-card">
-        <div class="sc-icon">🛵</div>
-        <div class="sc-name">Food delivery</div>
-        <div class="sc-desc">Add, remove, and merge orders</div>
-        <div class="sc-methods">
-          <code>splice</code><code>slice</code><code>indexOf</code><code>concat</code>
-        </div>
-      </a>
-
-    </div>
+    <div class="scenario-grid"><a href="playground.html?s=queue" class="scenario-card"><div class="sc-icon">☕</div><div class="sc-name">Coffee shop queue</div><div class="sc-desc">Customers joining and leaving</div><div class="sc-methods"><code>push</code><code>pop</code><code>shift</code><code>unshift</code></div></a><a href="playground.html?s=cart" class="scenario-card"><div class="sc-icon">🛒</div><div class="sc-name">Shopping cart</div><div class="sc-desc">Filter, discount, total</div><div class="sc-methods"><code>filter</code><code>map</code><code>reduce</code></div></a><a href="playground.html?s=playlist" class="scenario-card"><div class="sc-icon">🎵</div><div class="sc-name">Music playlist</div><div class="sc-desc">Sort, find, navigate</div><div class="sc-methods"><code>sort</code><code>reverse</code><code>find</code><code>at</code></div></a><a href="playground.html?s=students" class="scenario-card"><div class="sc-icon">📚</div><div class="sc-name">Student grades</div><div class="sc-desc">Check, search, flatten</div><div class="sc-methods"><code>every</code><code>some</code><code>includes</code><code>flat</code></div></a><a href="playground.html?s=delivery" class="scenario-card"><div class="sc-icon">🛵</div><div class="sc-name">Food delivery</div><div class="sc-desc">Add, remove, merge orders</div><div class="sc-methods"><code>splice</code><code>slice</code><code>indexOf</code><code>concat</code></div></a></div>
   </section>
-
   <section class="methods-preview">
     <div class="section-label">Quick reference</div>
-    <h2 class="section-title">All 37 instance methods</h2>
+    <h2 class="section-title">All methods at a glance</h2>
     <div class="method-tag-grid">
-      <div class="tag-group">
-        <div class="tag-group-label mutates">Mutates array</div>
-        <div class="tag-list">
-          <span class="mtag mutates">push()</span><span class="mtag mutates">pop()</span><span class="mtag mutates">shift()</span><span class="mtag mutates">unshift()</span><span class="mtag mutates">splice()</span><span class="mtag mutates">sort()</span><span class="mtag mutates">reverse()</span><span class="mtag mutates">fill()</span><span class="mtag mutates">copyWithin()</span>
-        </div>
-      </div>
-      <div class="tag-group">
-        <div class="tag-group-label copy">Returns new array</div>
-        <div class="tag-list">
-          <span class="mtag copy">map()</span><span class="mtag copy">filter()</span><span class="mtag copy">slice()</span><span class="mtag copy">concat()</span><span class="mtag copy">flat()</span><span class="mtag copy">flatMap()</span><span class="mtag copy">toReversed()</span><span class="mtag copy">toSorted()</span><span class="mtag copy">toSpliced()</span><span class="mtag copy">with()</span>
-        </div>
-      </div>
-      <div class="tag-group">
-        <div class="tag-group-label iter">Iterative</div>
-        <div class="tag-list">
-          <span class="mtag iter">forEach()</span><span class="mtag iter">reduce()</span><span class="mtag iter">reduceRight()</span><span class="mtag iter">every()</span><span class="mtag iter">some()</span><span class="mtag iter">entries()</span><span class="mtag iter">keys()</span><span class="mtag iter">values()</span>
-        </div>
-      </div>
-      <div class="tag-group">
-        <div class="tag-group-label search">Search &amp; access</div>
-        <div class="tag-list">
-          <span class="mtag search">find()</span><span class="mtag search">findIndex()</span><span class="mtag search">findLast()</span><span class="mtag search">findLastIndex()</span><span class="mtag search">indexOf()</span><span class="mtag search">lastIndexOf()</span><span class="mtag search">includes()</span><span class="mtag search">at()</span>
-        </div>
-      </div>
-      <div class="tag-group">
-        <div class="tag-group-label other">Other</div>
-        <div class="tag-list">
-          <span class="mtag other">join()</span><span class="mtag other">toString()</span><span class="mtag other">toLocaleString()</span>
-        </div>
-      </div>
-    </div>
+  <div class="tag-group"><div class="tag-group-label mutates">Mutates</div><div class="tag-list"><span class="mtag mutates">push()</span><span class="mtag mutates">pop()</span><span class="mtag mutates">shift()</span><span class="mtag mutates">unshift()</span><span class="mtag mutates">splice()</span><span class="mtag mutates">sort()</span><span class="mtag mutates">reverse()</span><span class="mtag mutates">fill()</span></div></div>
+  <div class="tag-group"><div class="tag-group-label copy">New array</div><div class="tag-list"><span class="mtag copy">map()</span><span class="mtag copy">filter()</span><span class="mtag copy">slice()</span><span class="mtag copy">concat()</span><span class="mtag copy">flat()</span><span class="mtag copy">flatMap()</span><span class="mtag copy">toReversed()</span><span class="mtag copy">toSorted()</span><span class="mtag copy">with()</span></div></div>
+  <div class="tag-group"><div class="tag-group-label iter">Iterative</div><div class="tag-list"><span class="mtag iter">forEach()</span><span class="mtag iter">reduce()</span><span class="mtag iter">every()</span><span class="mtag iter">some()</span><span class="mtag iter">entries()</span><span class="mtag iter">keys()</span><span class="mtag iter">values()</span></div></div>
+  <div class="tag-group"><div class="tag-group-label search">Search</div><div class="tag-list"><span class="mtag search">find()</span><span class="mtag search">findIndex()</span><span class="mtag search">findLast()</span><span class="mtag search">includes()</span><span class="mtag search">indexOf()</span><span class="mtag search">at()</span></div></div>
+</div>
     <div style="text-align:center;margin-top:2rem">
-      <a href="reference.html" class="btn-secondary">View full reference with examples →</a>
+      <a href="reference.html" class="btn-secondary">View full reference →</a>
     </div>
   </section>
-
 </main>
-
 <footer class="site-footer">
   <div class="footer-inner">
-    <span class="logo"><span class="logo-bracket">[</span>JS<span class="logo-accent">Arrays</span><span class="logo-bracket">]</span></span>
-    <span class="footer-note">Built for learning · Open source</span>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank" rel="noopener" class="footer-link">MDN Docs ↗</a>
+    <span class="logo"><span class="logo-bracket">[</span>JS<span class="logo-accent">Array Methods</span><span class="logo-bracket">]</span></span>
+    <span class="footer-note">Part of Fork My Brain</span>
+    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank" rel="noopener noreferrer" class="footer-link">MDN Docs ↗</a>
   </div>
 </footer>
-
 </body>
 </html>

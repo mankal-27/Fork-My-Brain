@@ -3,30 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Playground — Promises & Async</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
+<title>Playground — Async JS — Fork My Brain</title>
+<meta name="description" content="Interactive playground for Async JS.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
-<style>
-.async-node { animation-fill-mode: both; }
-.async-node.pop-in { animation: popIn .4s cubic-bezier(.34,1.56,.64,1) both; }
-</style>
 </head>
 <body>
-
 <header class="site-header">
   <nav class="nav-inner">
-    <a href="../index.html" class="logo"><span class="logo-bracket">←</span> <span style="color:var(--text2)">Fork My Brain</span></a>
+    <a href="../index.html" class="logo" style="color:var(--text2);font-size:13px">← Hub</a>
     <div class="nav-links">
-      <a href="../index.html" class="nav-link">Hub</a>
-      <a href="index.html" class="nav-link">Async</a>
+      <a href="index.html" class="nav-link">Async JS</a>
       <a href="playground.html" class="nav-link active">Playground</a>
       <a href="reference.html" class="nav-link">Reference</a>
     </div>
   </nav>
 </header>
-
 <div class="pg-layout">
   <aside class="pg-sidebar">
     <div class="pg-sidebar-title">Scenarios</div>
@@ -34,15 +29,13 @@
   </aside>
   <main class="pg-main" id="pg-main"></main>
 </div>
-
 <footer class="site-footer">
   <div class="footer-inner">
-    <a href="../index.html" class="logo"><span class="logo-bracket">[</span>JS<span class="logo-accent">Async</span><span class="logo-bracket">]</span></a>
-    <span class="footer-note">Part of Fork My Brain · Open source</span>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank" rel="noopener" class="footer-link">MDN Docs ↗</a>
+    <span class="logo"><span class="logo-bracket">[</span>JS<span class="logo-accent">Async JS</span><span class="logo-bracket">]</span></span>
+    <span class="footer-note">Part of Fork My Brain</span>
+    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank" rel="noopener noreferrer" class="footer-link">MDN Docs ↗</a>
   </div>
 </footer>
-
 <script src="js/scenarios.js"></script>
 <script src="js/playground.js"></script>
 </body>

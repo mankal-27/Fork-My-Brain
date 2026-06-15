@@ -3,20 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reference — Promises & Async</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<title>Promises & Async Reference — Fork My Brain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <header class="site-header">
   <nav class="nav-inner">
-    <a href="../index.html" class="logo"><span class="logo-bracket">←</span> <span style="color:var(--text2)">Fork My Brain</span></a>
+    <a href="../index.html" class="logo" style="color:var(--text2);font-size:13px">← Hub</a>
     <div class="nav-links">
-      <a href="../index.html" class="nav-link">Hub</a>
-      <a href="index.html" class="nav-link">Async</a>
+      <a href="index.html" class="nav-link">Async JS</a>
       <a href="playground.html" class="nav-link">Playground</a>
       <a href="reference.html" class="nav-link active">Reference</a>
     </div>
@@ -24,13 +22,11 @@
 </header>
 
 <div class="ref-layout">
-  <div class="ref-hero">
-    <div class="ref-title">Promises & Async reference</div>
-    <div class="ref-sub">All Promise static/instance methods + async/await keywords, sourced from MDN.</div>
-  </div>
+  <div class="ref-title">Async JS reference</div>
+  <div class="ref-sub">All methods from MDN — click any card to expand.</div>
   <div class="search-wrap">
     <span class="search-icon">⌕</span>
-    <input type="text" id="q" placeholder="Search, e.g. all, await, catch, race…" oninput="render()">
+    <input type="text" id="q" placeholder="Search methods…" oninput="renderRef()">
   </div>
   <div class="ref-filters" id="filters"></div>
   <div class="ref-count" id="count"></div>
@@ -39,13 +35,16 @@
 
 <footer class="site-footer">
   <div class="footer-inner">
-    <a href="../index.html" class="logo"><span class="logo-bracket">[</span>JS<span class="logo-accent">Async</span><span class="logo-bracket">]</span></a>
-    <span class="footer-note">Part of Fork My Brain · Open source</span>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank" rel="noopener" class="footer-link">MDN Docs ↗</a>
+    <span class="logo"><span class="logo-bracket">[</span>JS<span class="logo-accent">Async JS</span><span class="logo-bracket">]</span></span>
+    <span class="footer-note">Part of Fork My Brain</span>
+    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank" rel="noopener noreferrer" class="footer-link">MDN Docs ↗</a>
   </div>
 </footer>
 
+<script src="js/ref-engine.js"></script>
 <script>
+const BADGE = {"constructor":"mutates","concurrency":"copy","static":"iter","instance":"search","asyncawait":"other"};
+const CATS  = [{"key":"all","label":"All"},{"key":"constructor","label":"Constructor"},{"key":"concurrency","label":"Concurrency"},{"key":"static","label":"Static"},{"key":"instance","label":"Instance"},{"key":"asyncawait","label":"async/await"}];
 const METHODS = [
   // ── Constructor ──
   {name:"new Promise(executor)",cat:"constructor",summary:"Create a Promise — wrap callback-based code",desc:"Creates a new Promise. The executor function runs synchronously and receives two callbacks: resolve(value) to fulfill and reject(reason) to reject. Any error thrown inside the executor automatically rejects the promise.",code:`const p = new Promise((resolve, reject) => {
@@ -141,123 +140,9 @@ p.then(
   .then(user => user.posts)   // might throw
   .catch(err => {
     console.error(err.message);
-    return [];  // recover — chain continues with []
-  })
-  .then(posts => console.log(posts.length)); // 0`,tip:"Place .catch() at the end of a chain to handle any error from any step. Return a fallback value to recover."},
-  {name:".finally(onFinally)",cat:"instance",summary:"Always runs — whether fulfilled or rejected",desc:"Runs the callback when the promise settles regardless of outcome. The callback receives no arguments. Passes through the original fulfilled value or rejection reason unchanged — unless finally throws or returns a rejected promise.",code:`async function loadData() {
-  showSpinner();
-  try {
-    return await fetchData();
-  } catch (err) {
-    showError(err);
-  } finally {
-    hideSpinner(); // ALWAYS runs, no matter what
-  }
-}
-
-// With promise chains:
-fetchData()
-  .then(show)
-  .catch(showError)
-  .finally(hideSpinner); // always called`,tip:"Perfect for cleanup — hiding spinners, closing connections, releasing locks."},
-
-  // ── async/await ──
-  {name:"async function",cat:"asyncawait",summary:"Make a function always return a Promise",desc:"The async keyword before a function makes it always return a Promise. Return values are automatically wrapped in Promise.resolve(). Thrown errors are wrapped in Promise.reject(). Enables use of await inside.",code:`async function getUser(id) {
-  return { id, name: "Mankal" };
-  // Same as: return Promise.resolve({ id, name: "Mankal" })
-}
-
-// Works on any function form:
-const getUser = async (id) => fetch(\`/api/users/\${id}\`);
-const obj = { async load() { return fetch("/api"); } };`,tip:"You must use async to use await inside a function. Top-level await is available in ES modules without async."},
-  {name:"await expression",cat:"asyncawait",summary:"Pause until a Promise settles — returns resolved value",desc:"Pauses the async function until the Promise settles. Returns the fulfilled value. If the Promise rejects, await throws the rejection reason (catchable with try/catch). Only usable inside async functions (or top-level in modules).",code:`async function loadDashboard(id) {
-  // Each await pauses until resolved
-  const user  = await fetchUser(id);   // waits for user
-  const posts = await fetchPosts(id);  // waits for posts
-
-  // ✅ Run independently in parallel:
-  const [user2, posts2] = await Promise.all([
-    fetchUser(id), fetchPosts(id)
-  ]);
-}`,tip:"Don't await independent operations sequentially — use Promise.all() to run them in parallel."},
-  {name:"for await...of",cat:"asyncawait",summary:"Iterate over async iterables",desc:"Asynchronous version of for...of. Works with async iterables like ReadableStream, async generators, and any object implementing the async iterator protocol.",code:`// Async generator:
-async function* paginate(url) {
-  let page = 1;
-  while (true) {
-    const data = await fetch(\`\${url}?page=\${page++}\`).then(r => r.json());
-    if (!data.length) break;
-    yield data;
-  }
-}
-
-for await (const page of paginate("/api/posts")) {
-  renderPosts(page);
-}`,tip:"Essential for streaming APIs, async generators, and paginated data sources."},
-  {name:"Top-level await",cat:"asyncawait",summary:"Use await outside async functions in ES modules",desc:"In ES modules (.mjs or <script type='module'>), you can use await at the top level without wrapping in an async function. The module will pause loading until the awaited Promise resolves.",code:`// In a module file (script type=module or .mjs):
-const config = await fetch("/config.json").then(r => r.json());
-const db = await connectDatabase(config.dbUrl);
-
-export { config, db }; // other modules wait for these`,tip:"Only works in ES modules — not in CommonJS (require). The whole module is treated like an async function."},
-];
-
-const CATS = [
-  {key:"all",       label:"All"},
-  {key:"constructor",label:"Constructor"},
-  {key:"concurrency",label:"Concurrency"},
-  {key:"static",    label:"Static"},
-  {key:"instance",  label:"Instance"},
-  {key:"asyncawait",label:"async/await"},
-];
-const BADGE = {constructor:"mutates",concurrency:"copy",static:"iter",instance:"search",asyncawait:"other"};
-let activeCat="all", openSet=new Set();
-
-function render(){
-  const q=document.getElementById("q").value.toLowerCase();
-  const filtered=METHODS.filter(m=>{
-    const cm=activeCat==="all"||m.cat===activeCat;
-    const qm=!q||m.name.toLowerCase().includes(q)||m.summary.toLowerCase().includes(q)||m.desc.toLowerCase().includes(q);
-    return cm&&qm;
-  });
-  document.getElementById("count").textContent=`${filtered.length} method${filtered.length!==1?"s":""}`;
-  document.getElementById("list").innerHTML=filtered.map(m=>{
-    const open=openSet.has(m.name);
-    const esc=m.code.replace(/</g,"&lt;").replace(/>/g,"&gt;");
-    return `<div class="method-card">
-      <div class="method-header" onclick="toggle('${m.name.replace(/['"]/g,"")}')">
-        <span class="method-name">${m.name}</span>
-        <span class="method-badge ${BADGE[m.cat]||'other'}">${m.cat}</span>
-        <span class="method-summary">${m.summary}</span>
-        <span class="method-chevron${open?" open":""}">▾</span>
-      </div>
-      ${open?`<div class="method-body">
-        <p class="method-desc">${m.desc}</p>
-        <div class="method-example">${esc}</div>
-        <p class="method-tip">💡 ${m.tip}</p>
-      </div>`:""}
-    </div>`;
-  }).join("");
-}
-
-function toggle(name){
-  if(openSet.has(name))openSet.delete(name);
-  else openSet.add(name);
-  render();
-}
-
-const filtersEl=document.getElementById("filters");
-CATS.forEach(c=>{
-  const el=document.createElement("button");
-  el.className="ref-pill"+(c.key==="all"?" active":"");
-  el.textContent=c.label;
-  el.onclick=()=>{
-    activeCat=c.key;
-    document.querySelectorAll(".ref-pill").forEach(p=>p.classList.remove("active"));
-    el.classList.add("active");
-    render();
-  };
-  filtersEl.appendChild(el);
-});
-render();
+    return [];
+buildFilters(CATS);
+renderRef();
 </script>
 </body>
 </html>
