@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<title>DOM Manipulation — Fork My Brain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <nav class="nav-inner">
+    <a href="../index.html" class="logo" style="color:var(--text2);font-size:13px">← Hub</a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link active">DOM</a>
+      <a href="playground.html" class="nav-link">Playground</a>
+      <a href="reference.html" class="nav-link">Reference</a>
+    </div>
+  </nav>
+</header>
+<main>
+  <section class="hero">
+    <div class="hero-eyebrow">JavaScript · DOM · Interactive</div>
+    <h1 class="hero-title">DOM Manipulation,<br><span class="hero-accent">with live previews</span></h1>
+    <p class="hero-sub">querySelector, classList, events, createElement — every DOM method shown with a live mini-browser that updates as you step through each example.</p>
+    <div class="hero-cta">
+      <a href="playground.html" class="btn-primary">Try the playground</a>
+      <a href="reference.html" class="btn-secondary">Browse all methods</a>
+    </div>
+    <div class="hero-code">
+      <div class="code-window">
+        <div class="code-toolbar"><span class="dot-red"></span><span class="dot-amber"></span><span class="dot-green"></span><span class="code-filename">dom.js</span></div>
+        <pre class="code-body"><span class="c-comment">// Select → Modify → React</span>
+<span class="c-kw">const</span> btn = document.<span class="c-method">querySelector</span>(<span class="c-str">'#likeBtn'</span>);
+
+btn.<span class="c-method">addEventListener</span>(<span class="c-str">'click'</span>, (e) => {
+  e.target.<span class="c-method">classList</span>.<span class="c-method">toggle</span>(<span class="c-str">'liked'</span>);
+  counter.<span class="c-method">textContent</span> = ++count + <span class="c-str">' likes'</span>;
+});
+
+<span class="c-comment">// Build a notification dynamically</span>
+<span class="c-kw">const</span> li = document.<span class="c-method">createElement</span>(<span class="c-str">'li'</span>);
+li.<span class="c-method">textContent</span> = <span class="c-str">'New follower!'</span>;
+list.<span class="c-method">appendChild</span>(li);</pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="scenarios-section">
+    <div class="section-label">What you'll learn</div>
+    <h2 class="section-title">5 animated scenarios</h2>
+    <div class="scenario-grid">
+      <a href="playground.html?s=selecting" class="scenario-card">
+        <div class="sc-icon">🎯</div>
+        <div class="sc-name">Selecting elements</div>
+        <div class="sc-desc">Find any element on the page</div>
+        <div class="sc-methods"><code>querySelector</code><code>querySelectorAll</code><code>getElementById</code></div>
+      </a>
+      <a href="playground.html?s=modifying" class="scenario-card">
+        <div class="sc-icon">✏️</div>
+        <div class="sc-name">Modifying elements</div>
+        <div class="sc-desc">Change content, attributes, styles</div>
+        <div class="sc-methods"><code>textContent</code><code>setAttribute</code><code>style</code></div>
+      </a>
+      <a href="playground.html?s=classlist" class="scenario-card">
+        <div class="sc-icon">🎨</div>
+        <div class="sc-name">classList</div>
+        <div class="sc-desc">The cleanest way to manage styles</div>
+        <div class="sc-methods"><code>add</code><code>remove</code><code>toggle</code><code>contains</code></div>
+      </a>
+      <a href="playground.html?s=events" class="scenario-card">
+        <div class="sc-icon">🖱️</div>
+        <div class="sc-name">Event listeners</div>
+        <div class="sc-desc">Make pages interactive</div>
+        <div class="sc-methods"><code>addEventListener</code><code>event object</code><code>delegation</code></div>
+      </a>
+      <a href="playground.html?s=creating" class="scenario-card">
+        <div class="sc-icon">🏗️</div>
+        <div class="sc-name">Creating & removing</div>
+        <div class="sc-desc">Build the DOM dynamically</div>
+        <div class="sc-methods"><code>createElement</code><code>appendChild</code><code>remove</code></div>
+      </a>
+    </div>
+  </section>
+
+  <section class="methods-preview">
+    <div class="section-label">Quick reference</div>
+    <h2 class="section-title">All DOM methods</h2>
+    <div class="method-tag-grid">
+      <div class="tag-group"><div class="tag-group-label search">Selecting</div><div class="tag-list"><span class="mtag search">querySelector()</span><span class="mtag search">querySelectorAll()</span><span class="mtag search">getElementById()</span><span class="mtag search">getElementsByClassName()</span><span class="mtag search">getElementsByTagName()</span><span class="mtag search">closest()</span><span class="mtag search">matches()</span></div></div>
+      <div class="tag-group"><div class="tag-group-label copy">Modifying</div><div class="tag-list"><span class="mtag copy">textContent</span><span class="mtag copy">innerHTML</span><span class="mtag copy">setAttribute()</span><span class="mtag copy">getAttribute()</span><span class="mtag copy">removeAttribute()</span><span class="mtag copy">hasAttribute()</span><span class="mtag copy">style</span><span class="mtag copy">dataset</span></div></div>
+      <div class="tag-group"><div class="tag-group-label iter">classList</div><div class="tag-list"><span class="mtag iter">classList.add()</span><span class="mtag iter">classList.remove()</span><span class="mtag iter">classList.toggle()</span><span class="mtag iter">classList.contains()</span><span class="mtag iter">classList.replace()</span></div></div>
+      <div class="tag-group"><div class="tag-group-label mutates">Events</div><div class="tag-list"><span class="mtag mutates">addEventListener()</span><span class="mtag mutates">removeEventListener()</span><span class="mtag mutates">dispatchEvent()</span></div></div>
+      <div class="tag-group"><div class="tag-group-label other">Creating / removing</div><div class="tag-list"><span class="mtag other">createElement()</span><span class="mtag other">appendChild()</span><span class="mtag other">insertAdjacentHTML()</span><span class="mtag other">remove()</span><span class="mtag other">replaceWith()</span><span class="mtag other">cloneNode()</span><span class="mtag other">replaceChildren()</span></div></div>
+    </div>
+    <div style="text-align:center;margin-top:2rem">
+      <a href="reference.html" class="btn-secondary">View full reference →</a>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span class="logo"><span class="logo-bracket">[</span>JS<span class="logo-accent">DOM</span><span class="logo-bracket">]</span></span>
+    <span class="footer-note">Part of Fork My Brain</span>
+    <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document" target="_blank" rel="noopener noreferrer" class="footer-link">MDN Docs ↗</a>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<title>DOM Reference — Fork My Brain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <nav class="nav-inner">
+    <a href="../index.html" class="logo" style="color:var(--text2);font-size:13px">← Hub</a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">DOM</a>
+      <a href="playground.html" class="nav-link">Playground</a>
+      <a href="reference.html" class="nav-link active">Reference</a>
+    </div>
+  </nav>
+</header>
+<div class="ref-layout">
+  <div class="ref-title">DOM Manipulation reference</div>
+  <div class="ref-sub">All DOM methods from MDN — click any card to expand.</div>
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="q" placeholder="Search methods…" oninput="renderRef()">
+  </div>
+  <div class="ref-filters" id="filters"></div>
+  <div class="ref-count" id="count"></div>
+  <div id="list"></div>
+</div>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span class="logo"><span class="logo-bracket">[</span>JS<span class="logo-accent">DOM</span><span class="logo-bracket">]</span></span>
+    <span class="footer-note">Part of Fork My Brain</span>
+    <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document" target="_blank" rel="noopener noreferrer" class="footer-link">MDN Docs ↗</a>
+  </div>
+</footer>
+<script>
+const BADGE = {"selecting":"search","modifying":"copy","classlist":"iter","events":"mutates","creating":"other","traversal":"other"};
+const CATS  = [{"key":"all","label":"All"},{"key":"selecting","label":"Selecting"},{"key":"modifying","label":"Modifying"},{"key":"classlist","label":"classList"},{"key":"events","label":"Events"},{"key":"creating","label":"Creating"},{"key":"traversal","label":"Traversal"}];
+const METHODS = [
+  {name:"document.querySelector()",cat:"selecting",summary:"Select the first matching element by CSS selector",desc:"Returns the first element that matches the specified CSS selector, or null if no match. Accepts any valid CSS selector including classes, IDs, attributes, pseudo-classes, and combinators.",code:`document.querySelector('.btn');          // first .btn
+document.querySelector('#main h2');      // h2 inside #main
+document.querySelector('[data-id="3"]'); // attribute selector
+document.querySelector(':not(.hidden)'); // pseudo-class
+
+// Returns null if not found — always check!
+const el = document.querySelector('.missing');
+if (el) el.textContent = 'found!';`,tip:"The # and . prefixes work just like CSS — querySelector('#id') not querySelector('id')."},
+  {name:"document.querySelectorAll()",cat:"selecting",summary:"Select ALL matching elements — returns a NodeList",desc:"Returns a static (non-live) NodeList of all elements matching the CSS selector. Use .forEach(), spread [...list], or Array.from() to iterate.",code:`const btns = document.querySelectorAll('.btn');
+btns.length; // number of buttons
+
+// Iterate
+btns.forEach(btn => btn.classList.add('active'));
+
+// Convert to array for array methods
+const arr = [...document.querySelectorAll('li')];
+arr.filter(li => li.textContent.includes('done'));`,tip:"querySelectorAll returns a static snapshot. Use getElementsByClassName for a live collection that auto-updates."},
+  {name:"document.getElementById()",cat:"selecting",summary:"Fastest selector — find by ID",desc:"Returns the element with the matching ID, or null. The fastest DOM selector — browsers maintain an internal ID index. Does NOT use the # prefix (unlike querySelector).",code:`const modal = document.getElementById('modal');
+// Same as: document.querySelector('#modal')
+// But faster — direct hash lookup
+
+modal.style.display = 'flex';`,tip:"IDs must be unique per page. If you need multiple elements, use class + querySelectorAll instead."},
+  {name:"document.getElementsByClassName()",cat:"selecting",summary:"Live HTMLCollection by class name",desc:"Returns a live HTMLCollection of all elements with the given class name. Updates automatically if elements are added or removed from the DOM.",code:`const items = document.getElementsByClassName('item');
+// Live — if you add a .item to DOM, items updates!
+
+// Convert to array to use array methods:
+[...items].forEach(el => el.classList.add('highlight'));`,tip:"Prefer querySelectorAll('.class') for a static snapshot. Use getElementsByClassName only when you need live updates."},
+  {name:"document.getElementsByTagName()",cat:"selecting",summary:"Live HTMLCollection by tag name",desc:"Returns a live HTMLCollection of all elements with the given tag name. Use '*' to get all elements.",code:`const divs = document.getElementsByTagName('div');
+const all  = document.getElementsByTagName('*');
+
+// On a specific element:
+const listItems = ul.getElementsByTagName('li');`,tip:"Rarely used in modern code — querySelectorAll('div') is more flexible."},
+  {name:".closest()",cat:"selecting",summary:"Find nearest ancestor matching a selector",desc:"Traverses up the DOM from the element, returning the nearest ancestor (or itself) that matches the selector. Returns null if no ancestor matches.",code:`// Great for event delegation:
+list.addEventListener('click', e => {
+  const li = e.target.closest('li');
+  if (li) li.classList.toggle('done');
+});
+
+// Navigate up multiple levels:
+btn.closest('.modal'); // finds the modal wrapping the button
+btn.closest('[data-form]');`,tip:"closest() goes UP the tree (ancestors). Use querySelector() to go DOWN (descendants)."},
+  {name:".matches()",cat:"selecting",summary:"Test if an element matches a CSS selector",desc:"Returns true if the element would be selected by the given CSS selector. Used in event delegation to filter events by the actual target.",code:`el.matches('.active');          // has active class?
+el.matches('input[required]'); // required input?
+el.matches(':hover');          // currently hovered?
+
+// Event delegation pattern:
+document.addEventListener('click', e => {
+  if (e.target.matches('.delete-btn')) {
+    e.target.closest('li').remove();
+  }
+});`,tip:"Combine with closest() for clean event delegation — matches() checks the target, closest() navigates to the right ancestor."},
+  {name:".textContent",cat:"modifying",summary:"Get or set the plain text content of an element",desc:"Gets or sets the text content of an element and all its descendants. Treats everything as plain text — HTML tags are escaped. Safe for user content.",code:`el.textContent; // get all text (including hidden)
+el.textContent = 'Hello <b>World</b>';
+// Renders literally: Hello <b>World</b>
+// NOT bold — it's escaped!
+
+// vs innerHTML:
+el.innerHTML = 'Hello <b>World</b>'; // renders bold`,tip:"Always use textContent for user-supplied content to prevent XSS. Use innerHTML only for trusted HTML you control."},
+  {name:".innerHTML",cat:"modifying",summary:"Get or set HTML content — parses HTML tags",desc:"Gets or sets the HTML content inside an element, parsing tags. Powerful but dangerous with user content — can lead to XSS attacks.",code:`// Reading
+el.innerHTML; // '<b>Hello</b> World'
+
+// Writing — parsed as HTML
+el.innerHTML = '<strong>Bold</strong> text';
+
+// ⚠️ NEVER do this with user input:
+el.innerHTML = userInput; // XSS vulnerability!
+
+// Safe: use textContent or DOMPurify
+el.textContent = userInput; // safe`,tip:"innerHTML is powerful but risky. Sanitize with DOMPurify if you must use it with dynamic content."},
+  {name:".setAttribute()",cat:"modifying",summary:"Set any HTML attribute by name",desc:"Sets the value of an attribute on the specified element. Creates the attribute if it doesn't exist.",code:`el.setAttribute('src', 'image.jpg');
+el.setAttribute('disabled', '');  // boolean attr
+el.setAttribute('data-id', '42'); // data attribute
+el.setAttribute('class', 'btn active'); // replaces ALL classes
+
+// Shorthand for common attributes:
+el.src = 'image.jpg';  // equivalent for src
+el.id  = 'main';       // equivalent for id`,tip:"Use classList methods instead of setAttribute('class') to avoid accidentally replacing existing classes."},
+  {name:".getAttribute()",cat:"modifying",summary:"Read the value of any attribute",desc:"Returns the current value of an attribute as a string, or null if the attribute doesn't exist.",code:`el.getAttribute('href');      // "/about"
+el.getAttribute('data-id');  // "42" (always a string)
+el.getAttribute('disabled'); // "" (empty string for boolean attrs)
+el.getAttribute('missing');  // null
+
+// Shorthand:
+el.href; // same for most standard attributes`,tip:"getAttribute always returns strings. Convert with parseInt() or parseFloat() if you need numbers."},
+  {name:".removeAttribute()",cat:"modifying",summary:"Remove an attribute entirely",desc:"Removes the named attribute from an element. For boolean attributes like disabled, you must use removeAttribute — setting to false doesn't work.",code:`// Remove disabled — el.disabled = false doesn't work!
+btn.removeAttribute('disabled'); // ✓ correct
+btn.disabled = false;            // ✓ also works for IDL attrs
+
+el.removeAttribute('class');     // removes ALL classes
+el.removeAttribute('src');       // removes image source`,tip:"For disabled, hidden, and checked, you can use the property directly: btn.disabled = false. removeAttribute is needed for custom/data attributes."},
+  {name:".hasAttribute()",cat:"modifying",summary:"Check if an attribute exists",desc:"Returns true if the element has the specified attribute, false otherwise.",code:`el.hasAttribute('disabled');   // true or false
+el.hasAttribute('data-active'); // check data attribute
+el.hasAttribute('class');       // does it have any class?
+
+// Practical:
+if (!btn.hasAttribute('disabled')) {
+  btn.click();
+}`,tip:"For standard attributes like disabled, you can also check the property: if (!btn.disabled) {...}"},
+  {name:".style",cat:"modifying",summary:"Get or set inline CSS styles",desc:"The style object lets you read and write inline CSS properties using camelCase. Changes apply immediately as inline styles.",code:`el.style.backgroundColor = '#ff0000';
+el.style.fontSize = '18px';
+el.style.display = 'none';
+el.style.transform = 'rotate(45deg)';
+
+// Remove inline style:
+el.style.backgroundColor = '';
+
+// Set multiple at once:
+el.style.cssText = 'color:red;font-size:18px';
+
+// Read computed style (including CSS classes):
+getComputedStyle(el).fontSize; // "18px"`,tip:"Prefer classList for most styling. Use .style for dynamic values from calculations (e.g. el.style.width = px + 'px')."},
+  {name:".dataset",cat:"modifying",summary:"Read and write data-* attributes",desc:"Provides access to all data-* attributes as a DOMStringMap object. Property names convert kebab-case to camelCase.",code:`// HTML: <div data-user-id="42" data-role="admin">
+
+el.dataset.userId; // "42"  (data-user-id → userId)
+el.dataset.role;   // "admin"
+
+// Setting:
+el.dataset.status = 'active'; // adds data-status="active"
+
+// Delete:
+delete el.dataset.role; // removes data-role`,tip:"data-* attributes are perfect for storing metadata on elements without polluting class names or using hidden inputs."},
+  {name:"classList.add()",cat:"classlist",summary:"Add one or more CSS classes",desc:"Adds one or more class names to the element's class list. Ignores duplicates.",code:`el.classList.add('active');
+el.classList.add('visible', 'highlight', 'bold'); // multiple
+
+// vs className (replaces everything):
+el.className = 'active'; // ⚠️ removes ALL other classes`,tip:"classList.add() is additive — it never removes existing classes. Use className = only when you want to replace everything."},
+  {name:"classList.remove()",cat:"classlist",summary:"Remove one or more CSS classes",desc:"Removes one or more class names. Does nothing if the class doesn't exist (no error).",code:`el.classList.remove('active');
+el.classList.remove('visible', 'highlight'); // multiple
+
+// Does NOT error if class missing:
+el.classList.remove('nonexistent'); // safe, no error`,tip:"Removing a class that doesn't exist is safe — classList.remove() never throws."},
+  {name:"classList.toggle()",cat:"classlist",summary:"Add class if absent, remove if present",desc:"Toggles a class — removes it if present, adds it if absent. Returns true if the class is now present, false if removed. Optional second argument forces add (true) or remove (false).",code:`el.classList.toggle('dark-mode'); // flip
+
+// With force argument:
+el.classList.toggle('active', isActive); // set to isActive value
+el.classList.toggle('open', true);  // always add
+el.classList.toggle('open', false); // always remove
+
+// Returns the new state:
+const isNowOpen = el.classList.toggle('open');`,tip:"The return value lets you know what state the class is now in — useful for updating ARIA attributes or button labels."},
+  {name:"classList.contains()",cat:"classlist",summary:"Check if an element has a specific class",desc:"Returns true if the element has the given class, false otherwise.",code:`el.classList.contains('active');  // true or false
+el.classList.contains('hidden');  // check visibility
+
+// Practical use:
+if (!nav.classList.contains('open')) {
+  nav.classList.add('open');
+}`,tip:"Cleaner than checking el.className.includes('active') which could match 'not-active'."},
+  {name:"classList.replace()",cat:"classlist",summary:"Swap one class for another atomically",desc:"Replaces oldClass with newClass. Returns true if the replacement was successful, false if oldClass wasn't found.",code:`el.classList.replace('loading', 'loaded');
+el.classList.replace('theme-light', 'theme-dark');
+
+// Returns false if oldClass not found:
+const replaced = el.classList.replace('x', 'y');
+if (!replaced) { /* 'x' wasn't there */ }`,tip:"More reliable than remove() + add() — no intermediate state where neither class exists."},
+  {name:".addEventListener()",cat:"events",summary:"Attach an event handler to an element",desc:"Attaches a function to call when the specified event fires. Multiple listeners can be added to the same element for the same event type.",code:`el.addEventListener('click', (e) => {
+  console.log(e.target);    // element clicked
+  console.log(e.type);      // 'click'
+  console.log(e.clientX);   // mouse X position
+});
+
+// Common events:
+// 'click' 'dblclick' 'mouseover' 'mouseout'
+// 'keydown' 'keyup' 'keypress'
+// 'input' 'change' 'submit' 'focus' 'blur'
+// 'scroll' 'resize' 'load' 'DOMContentLoaded'`,tip:"addEventListener can be called multiple times to add multiple handlers. Use {once: true} as 3rd arg to auto-remove after first fire."},
+  {name:".removeEventListener()",cat:"events",summary:"Remove a previously attached event handler",desc:"Removes an event listener that was previously added. You must pass the exact same function reference — anonymous functions cannot be removed.",code:`function handleClick(e) { console.log('clicked'); }
+
+el.addEventListener('click', handleClick);
+el.removeEventListener('click', handleClick); // works ✓
+
+// ⚠️ This does NOT work:
+el.addEventListener('click', () => {});
+el.removeEventListener('click', () => {}); // different ref!
+
+// Use AbortController for cleaner cleanup:
+const controller = new AbortController();
+el.addEventListener('click', fn, { signal: controller.signal });
+controller.abort(); // removes all listeners with this signal`,tip:"Save your handler as a named function or variable when you'll need to remove it later."},
+  {name:".dispatchEvent()",cat:"events",summary:"Programmatically fire an event",desc:"Dispatches a synthetic event to the element, as if it happened naturally. Useful for triggering form submissions, testing, and custom event flows.",code:`// Trigger a click programmatically:
+btn.dispatchEvent(new Event('click'));
+
+// Custom events:
+const event = new CustomEvent('itemAdded', {
+  detail: { id: 42, name: 'Sneakers' },
+  bubbles: true
+});
+el.dispatchEvent(event);
+
+// Listen for custom event:
+document.addEventListener('itemAdded', e => {
+  console.log(e.detail.name); // 'Sneakers'
+});`,tip:"CustomEvent with bubbles: true lets you communicate up the DOM tree — a clean pattern for component-style communication."},
+  {name:"document.createElement()",cat:"creating",summary:"Create a new element node",desc:"Creates a new HTML element in memory (not yet attached to the DOM). Set its properties before inserting it.",code:`const div = document.createElement('div');
+const li  = document.createElement('li');
+const img = document.createElement('img');
+
+// Configure before inserting:
+li.textContent = 'New item';
+li.className = 'list-item';
+li.dataset.id = '42';
+
+// Then insert:
+list.appendChild(li);`,tip:"Create → configure → insert. The element is invisible until inserted into the DOM."},
+  {name:".appendChild()",cat:"creating",summary:"Insert an element as the last child",desc:"Appends a node as the last child of the parent element. If the node is already in the DOM, it's moved (not duplicated).",code:`const li = document.createElement('li');
+li.textContent = 'New item';
+list.appendChild(li); // added to the end
+
+// Moving an existing element:
+list2.appendChild(list1.firstElementChild);
+// Moves (not copies) the first item to list2`,tip:"appendChild always adds to the END. Use insertBefore(), prepend(), or insertAdjacentElement() for other positions."},
+  {name:".insertAdjacentHTML()",cat:"creating",summary:"Inject HTML at a specific position — fastest method",desc:"Parses and inserts HTML string at one of 4 positions relative to the element. More efficient than innerHTML += which re-parses the whole element.",code:`// Positions:
+el.insertAdjacentHTML('beforebegin', html); // before el
+el.insertAdjacentHTML('afterbegin',  html); // first inside el
+el.insertAdjacentHTML('beforeend',   html); // last inside el
+el.insertAdjacentHTML('afterend',    html); // after el
+
+// Add to top of list:
+list.insertAdjacentHTML('afterbegin', '<li>First!</li>');
+
+// Add multiple items efficiently:
+const html = items.map(i => '<li>' + i + '</li>').join('');
+list.insertAdjacentHTML('beforeend', html);`,tip:"insertAdjacentHTML is faster than innerHTML += for large lists because it doesn't re-parse existing content."},
+  {name:".remove()",cat:"creating",summary:"Remove an element from the DOM",desc:"Removes the element from its parent and the DOM entirely. Simple and direct — no need to reference the parent.",code:`const el = document.querySelector('.toast');
+el.remove(); // gone!
+
+// Old way (still works):
+el.parentNode.removeChild(el);
+
+// Remove all children:
+while (list.firstChild) list.firstChild.remove();
+// Or modern:
+list.replaceChildren(); // empties the element`,tip:"After remove(), the element still exists in memory — you can re-append it later. It's just detached from the DOM."},
+  {name:".replaceWith()",cat:"creating",summary:"Replace an element with another node or HTML string",desc:"Replaces the element in the DOM with one or more nodes or strings. The replaced element is removed.",code:`const newBtn = document.createElement('button');
+newBtn.textContent = 'Updated!';
+oldBtn.replaceWith(newBtn);
+
+// Replace with HTML string:
+el.replaceWith('<div class="card">New content</div>');
+
+// Replace with multiple nodes:
+el.replaceWith(node1, 'text', node2);`,tip:"replaceWith() is cleaner than parentNode.replaceChild() which requires a reference to the parent."},
+  {name:".cloneNode()",cat:"creating",summary:"Create a copy of an element",desc:"Returns a copy of the element. Pass true to deep clone (including all children), false for shallow clone (element only).",code:`// Shallow clone (no children):
+const copy = template.cloneNode(false);
+
+// Deep clone (element + all descendants):
+const fullCopy = card.cloneNode(true);
+fullCopy.querySelector('.title').textContent = 'New card';
+container.appendChild(fullCopy);`,tip:"Event listeners are NOT cloned — you'll need to re-attach them after cloning."},
+  {name:"element.parentElement",cat:"traversal",summary:"Get the parent element",desc:"Returns the parent element of the current element, or null if it has no parent or the parent is not an Element.",code:`const li = document.querySelector('li');
+li.parentElement;        // the <ul> or <ol>
+li.parentElement.parentElement; // grandparent
+
+// Walk all the way up:
+let el = btn;
+while (el.parentElement) {
+  console.log(el.tagName);
+  el = el.parentElement;
+}`,tip:"parentElement is usually what you want. parentNode can return non-element nodes like DocumentFragment."},
+  {name:"element.children",cat:"traversal",summary:"Live HTMLCollection of child elements",desc:"Returns a live HTMLCollection of all direct child elements (excludes text nodes and comments).",code:`ul.children;        // HTMLCollection of <li> elements
+ul.children.length; // number of items
+ul.children[0];     // first child element
+ul.firstElementChild;  // same as children[0]
+ul.lastElementChild;   // last child element`,tip:"children excludes text nodes. childNodes includes everything — usually children is what you want."},
+  {name:"element.nextElementSibling",cat:"traversal",summary:"Get the next sibling element",desc:"Returns the next sibling element in the DOM, or null if there is none. Skips text and comment nodes.",code:`const current = document.querySelector('.active');
+const next = current.nextElementSibling;
+const prev = current.previousElementSibling;
+
+// Navigate a list:
+if (next) {
+  current.classList.remove('active');
+  next.classList.add('active');
+}`,tip:"nextSibling and previousSibling include text nodes. Use nextElementSibling/previousElementSibling to skip them."},
+]
+</script>
+<script src="js/ref-engine.js"></script>
+<script>buildFilters(CATS); renderRef();</script>
+</body>
+</html>
