@@ -1,4 +1,11 @@
 let activeScenario = 0;
+
+function safeText(str) {
+  const d = document.createElement('div');
+  d.textContent = String(str ?? '');
+  return d.innerHTML;
+}
+
 let activeStep = 0;
 
 function getScenarioFromURL() {
@@ -14,9 +21,9 @@ function getScenarioFromURL() {
 function buildNav() {
   const nav = document.getElementById('pg-nav');
   nav.innerHTML = SCENARIOS.map((s, i) => `
-    <button class="pg-nav-btn${i === activeScenario ? ' active' : ''}" onclick="selectScenario(${i})">
+    <button class="pg-nav-btn${i === activeScenario ? ' active' : ''}" data-idx="${i}">
       <span class="pg-nav-icon">${s.icon}</span>
-      <span>${s.label}</span>
+      <span>${safeText(s.label)}</span>
     </button>
   `).join('');
 }
@@ -53,15 +60,15 @@ function renderNode(node, animate) {
       min-width:160px;max-width:220px;
     ">
       <span style="font-size:11px;color:${c.text};font-family:var(--mono)">${STATE_ICON[node.state]} ${node.state}</span>
-      <span style="font-size:13px;font-weight:500;color:var(--text);font-family:var(--mono)">${node.label}</span>
-      ${node.sub ? `<span style="font-size:11px;color:var(--text2)">${node.sub}</span>` : ''}
+      <span style="font-size:13px;font-weight:500;color:var(--text);font-family:var(--mono)">${safeText(node.label)}</span>
+      ${node.sub ? `<span style="font-size:11px;color:var(--text2)">${safeText(node.sub)}</span>` : ''}
     </div>`;
 }
 
 function renderArrow(arrow) {
   return `
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0 4px">
-      ${arrow.label ? `<span style="font-size:10px;color:var(--text3);font-family:var(--mono);white-space:nowrap">${arrow.label}</span>` : ''}
+      ${arrow.label ? `<span style="font-size:10px;color:var(--text3);font-family:var(--mono);white-space:nowrap">${safeText(arrow.label)}</span>` : ''}
       <span style="color:var(--text3);font-size:18px;line-height:1">→</span>
     </div>`;
 }
@@ -145,8 +152,8 @@ function renderScene(animate) {
 
   document.getElementById('pg-main').innerHTML = `
     <div class="pg-scene-header">
-      <div class="pg-scene-title">${sc.icon} ${sc.title}</div>
-      <div class="pg-scene-sub">${sc.sub}</div>
+      <div class="pg-scene-title">${sc.icon} ${safeText(sc.title)}</div>
+      <div class="pg-scene-sub">${safeText(sc.sub)}</div>
     </div>
 
     <div class="progress-bar">
@@ -165,14 +172,14 @@ function renderScene(animate) {
       ${diagramHTML || `<span style="font-size:13px;color:var(--text3)">Loading diagram...</span>`}
     </div>
 
-    <div class="explanation">${step.explain}</div>
-    <div class="result-output">// ${step.result}</div>
+    <div class="explanation">${safeText(step.explain)}</div>
+    <div class="result-output">// ${safeText(step.result)}</div>
 
     <div class="step-controls">
-      <button class="step-btn" onclick="prevStep()" ${activeStep === 0 ? 'disabled' : ''}>← Prev</button>
-      <button class="step-btn" onclick="nextStep()" ${activeStep === total - 1 ? 'disabled' : ''}>Next →</button>
+      <button class="step-btn" data-action="prev" ${activeStep === 0 ? 'disabled' : ''}>← Prev</button>
+      <button class="step-btn" data-action="next" ${activeStep === total - 1 ? 'disabled' : ''}>Next →</button>
       <span class="step-pill">${activeStep + 1} / ${total}</span>
-      <span class="step-name">${step.label}</span>
+      <span class="step-name">${safeText(step.label)}</span>
     </div>
   `;
 }
@@ -188,6 +195,20 @@ function prevStep() {
 document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight') nextStep();
   if (e.key === 'ArrowLeft') prevStep();
+});
+
+
+document.getElementById('pg-main').addEventListener('click', function(e) {
+  const btn = e.target.closest('[data-action]');
+  if (btn) {
+    if (btn.dataset.action === 'next') nextStep();
+    if (btn.dataset.action === 'prev') prevStep();
+  }
+});
+
+document.getElementById('pg-nav').addEventListener('click', function(e) {
+  const btn = e.target.closest('[data-idx]');
+  if (btn) selectScenario(Number(btn.dataset.idx));
 });
 
 activeScenario = getScenarioFromURL();

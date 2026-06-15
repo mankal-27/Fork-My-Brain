@@ -1,138 +1,121 @@
-let activeScenario = 0;
-let activeStep = 0;
+let activeScenario = 0, activeStep = 0;
+
+function safeText(s) {
+  const d = document.createElement('div');
+  d.textContent = String(s ?? '');
+  return d.innerHTML;
+}
 
 function getScenarioFromURL() {
-  const params = new URLSearchParams(window.location.search);
-  const s = params.get('s');
-  if (s) {
-    const idx = SCENARIOS.findIndex(sc => sc.id === s);
-    if (idx !== -1) return idx;
-  }
+  const s = new URLSearchParams(location.search).get('s');
+  if (s) { const i = SCENARIOS.findIndex(x => x.id === s); if (i !== -1) return i; }
   return 0;
 }
 
 function buildNav() {
-  const nav = document.getElementById('pg-nav');
-  nav.innerHTML = SCENARIOS.map((s, i) => `
-    <button class="pg-nav-btn${i === activeScenario ? ' active' : ''}" onclick="selectScenario(${i})">
+  document.getElementById('pg-nav').innerHTML = SCENARIOS.map((s, i) =>
+    `<button class="pg-nav-btn${i === activeScenario ? ' active' : ''}" data-idx="${i}">
       <span class="pg-nav-icon">${s.icon}</span>
-      <span>${s.label}</span>
-    </button>
-  `).join('');
+      <span>${safeText(s.label)}</span>
+    </button>`
+  ).join('');
 }
 
 function selectScenario(i) {
-  activeScenario = i;
-  activeStep = 0;
-  buildNav();
-  renderScene(false);
-  const url = new URL(window.location);
-  url.searchParams.set('s', SCENARIOS[i].id);
-  window.history.replaceState({}, '', url);
+  activeScenario = i; activeStep = 0;
+  buildNav(); renderScene(false);
+  const u = new URL(location); u.searchParams.set('s', SCENARIOS[i].id);
+  history.replaceState({}, '', u);
 }
 
-function renderItem(item, isNew) {
-  const classes = ['item'];
-  if (item.dim) classes.push('dim');
-  if (item.fail) classes.push('fail');
-  const step = SCENARIOS[activeScenario].steps[activeStep];
-  const isHighlight = step.highlight && step.highlight.includes(item.n);
-  if (isHighlight && !item.dim && !item.fail) classes.push('highlight');
-  if (isNew) classes.push('pop-in');
-  return `<div class="${classes.join(' ')}">
-    <span class="iname">${item.n}</span>
-    ${item.s ? `<span class="isub">${item.s}</span>` : ''}
-  </div>`;
-}
-
-function syntaxHL(code) {
+function hl(code) {
   return code
+    .replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/\/\/.*/g, m => `<span class="c-comment">${m}</span>`)
-    .replace(/\b(const|let|var|return|new|function|=&gt;)\b/g, m => `<span class="c-kw">${m}</span>`)
-    .replace(/\b(push|pop|shift|unshift|splice|slice|sort|reverse|filter|map|reduce|find|findIndex|at|includes|indexOf|every|some|flat|flatMap|concat|forEach|join|with|toSorted|toReversed)\b(?=\()/g, m => `<span class="c-method">${m}</span>`)
+    .replace(/\b(const|let|var|return|new|function|async|await|try|catch|finally|if|else|throw)\b/g,
+      m => `<span class="c-kw">${m}</span>`)
+    .replace(/\b(push|pop|shift|unshift|splice|slice|sort|reverse|filter|map|reduce|find|findIndex|findLast|findLastIndex|at|includes|indexOf|lastIndexOf|every|some|flat|flatMap|concat|forEach|join|with|toSorted|toReversed|toSpliced|trim|trimStart|trimEnd|toLowerCase|toUpperCase|replace|replaceAll|split|includes|startsWith|endsWith|padStart|padEnd|repeat|slice|substring|charAt|charCodeAt|match|matchAll|search|normalize|localeCompare|Promise|fetch|resolve|reject|all|allSettled|race|any|then|catch|finally)\b(?=[\s(.])/g,
+      m => `<span class="c-method">${m}</span>`)
     .replace(/'([^']*)'/g, m => `<span class="c-str">${m}</span>`)
+    .replace(/`([^`]*)`/g, m => `<span class="c-str">${m}</span>`)
     .replace(/\b(\d+)\b/g, m => `<span class="c-num">${m}</span>`);
 }
 
+function renderItem(item, isNew) {
+  const sc = SCENARIOS[activeScenario], step = sc.steps[activeStep];
+  const isHL = step.highlight && step.highlight.includes(item.n);
+  const cls = ['item',
+    item.dim ? 'dim' : '',
+    item.fail ? 'fail' : '',
+    (isHL && !item.dim && !item.fail) ? 'highlight' : '',
+    isNew ? 'pop-in' : ''
+  ].filter(Boolean).join(' ');
+  return `<div class="${cls}">
+    <span class="iname">${safeText(item.n)}</span>
+    ${item.s ? `<span class="isub">${safeText(item.s)}</span>` : ''}
+  </div>`;
+}
+
 function renderScene(animate) {
-  const sc = SCENARIOS[activeScenario];
-  const step = sc.steps[activeStep];
+  const sc = SCENARIOS[activeScenario], step = sc.steps[activeStep];
   const total = sc.steps.length;
-  const progress = ((activeStep + 1) / total) * 100;
+  const pct = ((activeStep + 1) / total * 100).toFixed(1);
 
-  let itemsHTML = '';
-  if (step.items && step.items.length > 0) {
-    itemsHTML = step.items.map(item => {
-      const isNew = animate && step.newItems && step.newItems.includes(item.n);
-      return renderItem(item, isNew);
-    }).join('');
-  } else {
-    itemsHTML = `<span style="font-size:13px;color:var(--text3);font-style:italic;font-family:var(--mono)">[]  // empty array</span>`;
+  let itemsHTML = step.items && step.items.length
+    ? step.items.map(item => renderItem(item,
+        animate && step.newItems && step.newItems.includes(item.n)
+      )).join('')
+    : `<span style="font-size:13px;color:var(--text3);font-style:italic;font-family:var(--mono)">[]</span>`;
+
+  let resultHTML = '';
+  if (step.resultItems && step.resultItems.length) {
+    resultHTML = `<div class="stage-row" style="margin-top:8px;border-top:0.5px solid var(--border);padding-top:10px">
+      <span class="stage-label" style="color:var(--teal)">result</span>
+      ${step.resultItems.map(it =>
+        `<div class="item result"><span class="iname">${safeText(it.n)}</span>${it.s ? `<span class="isub">${safeText(it.s)}</span>` : ''}</div>`
+      ).join('')}
+    </div>`;
   }
-
-  let resultItemsHTML = '';
-  if (step.resultItems && step.resultItems.length > 0) {
-    resultItemsHTML = `
-      <div class="stage-row" style="margin-top:8px;border-top:0.5px solid var(--border);padding-top:10px">
-        <span class="stage-label" style="color:var(--teal)">→ result</span>
-        ${step.resultItems.map(item => `<div class="item result"><span class="iname">${item.n}</span>${item.s ? `<span class="isub">${item.s}</span>` : ''}</div>`).join('')}
-      </div>`;
-  }
-
-  let totalBadgeHTML = '';
-  if (step.totalBadge) {
-    totalBadgeHTML = `<div class="total-badge">${step.totalBadge}</div>`;
-  }
-
-  const escapedCode = step.code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  let badgeHTML = step.totalBadge
+    ? `<div class="total-badge">${safeText(step.totalBadge)}</div>` : '';
 
   document.getElementById('pg-main').innerHTML = `
     <div class="pg-scene-header">
-      <div class="pg-scene-title">${sc.icon} ${sc.title}</div>
-      <div class="pg-scene-sub">${sc.sub}</div>
+      <div class="pg-scene-title">${sc.icon} ${safeText(sc.title)}</div>
+      <div class="pg-scene-sub">${safeText(sc.sub)}</div>
     </div>
-
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:${progress}%"></div>
-    </div>
-
-    <div class="code-block">${syntaxHL(escapedCode)}</div>
-
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="code-block">${hl(step.code)}</div>
     <div class="stage">
       <div class="stage-row">
         <span class="stage-label">array</span>
         ${itemsHTML}
       </div>
-      ${resultItemsHTML}
-      ${totalBadgeHTML}
+      ${resultHTML}${badgeHTML}
     </div>
-
-    <div class="explanation">${step.explain}</div>
-    <div class="result-output">// ${step.result}</div>
-
+    <div class="explanation">${safeText(step.explain)}</div>
+    <div class="result-output">// ${safeText(step.result)}</div>
     <div class="step-controls">
-      <button class="step-btn" onclick="prevStep()" ${activeStep === 0 ? 'disabled' : ''}>← Prev</button>
-      <button class="step-btn" onclick="nextStep()" ${activeStep === total - 1 ? 'disabled' : ''}>Next →</button>
+      <button class="step-btn" data-action="prev" ${activeStep === 0 ? 'disabled' : ''}>← Prev</button>
+      <button class="step-btn" data-action="next" ${activeStep === total - 1 ? 'disabled' : ''}>Next →</button>
       <span class="step-pill">${activeStep + 1} / ${total}</span>
-      <span class="step-name">${step.label}</span>
-    </div>
-  `;
+      <span class="step-name">${safeText(step.label)}</span>
+    </div>`;
 }
 
-function nextStep() {
-  const sc = SCENARIOS[activeScenario];
-  if (activeStep < sc.steps.length - 1) {
-    activeStep++;
-    renderScene(true);
-  }
-}
+function nextStep() { const sc = SCENARIOS[activeScenario]; if (activeStep < sc.steps.length - 1) { activeStep++; renderScene(true); } }
+function prevStep() { if (activeStep > 0) { activeStep--; renderScene(false); } }
 
-function prevStep() {
-  if (activeStep > 0) {
-    activeStep--;
-    renderScene(false);
+// Event delegation — no inline onclick anywhere
+document.addEventListener('click', function(e) {
+  const navBtn = e.target.closest('[data-idx]');
+  if (navBtn) { selectScenario(Number(navBtn.dataset.idx)); return; }
+  const stepBtn = e.target.closest('[data-action]');
+  if (stepBtn && !stepBtn.disabled) {
+    if (stepBtn.dataset.action === 'next') nextStep();
+    if (stepBtn.dataset.action === 'prev') prevStep();
   }
-}
+});
 
 document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight') nextStep();

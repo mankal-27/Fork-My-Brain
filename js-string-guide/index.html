@@ -3,165 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
 <title>JS String Methods — Fork My Brain</title>
-<meta name="description" content="Every JavaScript String method with animated real-world scenarios — form validation, chat apps, URL slugs and more.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<meta name="description" content="Every JavaScript String method with animated real-world scenarios.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <header class="site-header">
   <nav class="nav-inner">
-    <a href="../index.html" class="logo"><span class="logo-bracket">←</span> <span style="color:var(--text2)">Fork My Brain</span></a>
+    <a href="../index.html" class="logo" style="color:var(--text2);font-size:13px">← Hub</a>
     <div class="nav-links">
-      <a href="../index.html" class="nav-link">Hub</a>
-      <a href="index.html" class="nav-link active">Strings</a>
+      <a href="index.html" class="nav-link active">String Methods</a>
       <a href="playground.html" class="nav-link">Playground</a>
       <a href="reference.html" class="nav-link">Reference</a>
     </div>
   </nav>
 </header>
-
 <main>
   <section class="hero">
     <div class="hero-eyebrow">JavaScript · String Methods · Interactive</div>
-    <h1 class="hero-title">String methods,<br><span class="hero-accent">in the real world</span></h1>
-    <p class="hero-sub">Every built-in String method illustrated with real scenarios — form validators, chat messages, URL slugs, and receipt formatters. No dry theory.</p>
+    <h1 class="hero-title">String Methods,<br><span class="hero-accent">in the real world</span></h1>
+    <p class="hero-sub">All 32 String methods illustrated with real scenarios — form validators, URL slugs, receipt formatters, search engines.</p>
     <div class="hero-cta">
       <a href="playground.html" class="btn-primary">Try the playground</a>
       <a href="reference.html" class="btn-secondary">Browse all methods</a>
     </div>
     <div class="hero-code">
       <div class="code-window">
-        <div class="code-toolbar">
-          <span class="dot dot-red"></span><span class="dot dot-amber"></span><span class="dot dot-green"></span>
-          <span class="code-filename">strings.js</span>
-        </div>
+        <div class="code-toolbar"><span class="dot-red"></span><span class="dot-amber"></span><span class="dot-green"></span><span class="code-filename">example.js</span></div>
         <pre class="code-body"><span class="c-comment">// Real string problems, real methods</span>
-<span class="c-kw">const</span> username = <span class="c-str">"  Mankal_27  "</span>;
-
-<span class="c-comment">// Clean up user input</span>
-username.<span class="c-method">trim</span>();            <span class="c-comment">// "Mankal_27"</span>
-
-<span class="c-comment">// Validate an email</span>
-<span class="c-str">"hi@fork.dev"</span>.<span class="c-method">includes</span>(<span class="c-str">"@"</span>);  <span class="c-comment">// true</span>
-
-<span class="c-comment">// Build a URL slug from a title</span>
+<span class="c-kw">const</span> input = <span class="c-str">"  Mankal@Fork.DEV  "</span>;
+input.<span class="c-method">trim</span>();           <span class="c-comment">// "Mankal@Fork.DEV"</span>
+input.<span class="c-method">toLowerCase</span>();    <span class="c-comment">// "mankal@fork.dev"</span>
+input.<span class="c-method">includes</span>(<span class="c-str">"@"</span>);   <span class="c-comment">// true</span>
+<span class="c-comment">// Build a URL slug</span>
 <span class="c-str">"Hello World!"</span>
-  .<span class="c-method">toLowerCase</span>()        <span class="c-comment">// "hello world!"</span>
-  .<span class="c-method">replace</span>(<span class="c-str">/[^a-z0-9]+/g</span>, <span class="c-str">"-"</span>) <span class="c-comment">// "hello-world-"</span>
-  .<span class="c-method">replace</span>(<span class="c-str">/-$/</span>, <span class="c-str">""</span>);      <span class="c-comment">// "hello-world"</span>
-
-<span class="c-comment">// Truncate a long tweet</span>
-<span class="c-str">"JavaScript is awesome"</span>.<span class="c-method">slice</span>(<span class="c-num">0</span>, <span class="c-num">10</span>) + <span class="c-str">"..."</span>;
-<span class="c-comment">// "JavaScript..."</span></pre>
+  .<span class="c-method">toLowerCase</span>()
+  .<span class="c-method">replace</span>(<span class="c-str">/[^a-z0-9]+/g</span>, <span class="c-str">"-"</span>)
+  .<span class="c-method">replace</span>(<span class="c-str">/-$/</span>, <span class="c-str">""</span>);  <span class="c-comment">// "hello-world"</span></pre>
       </div>
     </div>
   </section>
-
   <section class="scenarios-section">
     <div class="section-label">What you'll learn</div>
     <h2 class="section-title">5 real-world scenarios</h2>
-    <div class="scenario-grid">
-
-      <a href="playground.html?s=form" class="scenario-card">
-        <div class="sc-icon">📋</div>
-        <div class="sc-name">Form validation</div>
-        <div class="sc-desc">Clean and validate user input</div>
-        <div class="sc-methods">
-          <code>trim</code><code>includes</code><code>startsWith</code><code>endsWith</code><code>length</code>
-        </div>
-      </a>
-
-      <a href="playground.html?s=chat" class="scenario-card">
-        <div class="sc-icon">💬</div>
-        <div class="sc-name">Chat messages</div>
-        <div class="sc-desc">Format and search chat text</div>
-        <div class="sc-methods">
-          <code>toUpperCase</code><code>replace</code><code>split</code><code>indexOf</code><code>repeat</code>
-        </div>
-      </a>
-
-      <a href="playground.html?s=slug" class="scenario-card">
-        <div class="sc-icon">🔗</div>
-        <div class="sc-name">URL slug builder</div>
-        <div class="sc-desc">Turn blog titles into URL slugs</div>
-        <div class="sc-methods">
-          <code>toLowerCase</code><code>replace</code><code>replaceAll</code><code>trim</code>
-        </div>
-      </a>
-
-      <a href="playground.html?s=receipt" class="scenario-card">
-        <div class="sc-icon">🧾</div>
-        <div class="sc-name">Receipt formatter</div>
-        <div class="sc-desc">Pad and align a printed receipt</div>
-        <div class="sc-methods">
-          <code>padStart</code><code>padEnd</code><code>slice</code><code>repeat</code>
-        </div>
-      </a>
-
-      <a href="playground.html?s=search" class="scenario-card">
-        <div class="sc-icon">🔍</div>
-        <div class="sc-name">Search & highlight</div>
-        <div class="sc-desc">Find and extract text in content</div>
-        <div class="sc-methods">
-          <code>indexOf</code><code>lastIndexOf</code><code>match</code><code>substring</code><code>at</code>
-        </div>
-      </a>
-
-    </div>
+    <div class="scenario-grid"><a href="playground.html?s=form" class="scenario-card"><div class="sc-icon">📋</div><div class="sc-name">Form validation</div><div class="sc-desc">Clean and validate user input</div><div class="sc-methods"><code>trim</code><code>includes</code><code>startsWith</code><code>endsWith</code></div></a><a href="playground.html?s=chat" class="scenario-card"><div class="sc-icon">💬</div><div class="sc-name">Chat messages</div><div class="sc-desc">Format and search text</div><div class="sc-methods"><code>toUpperCase</code><code>replace</code><code>split</code><code>repeat</code></div></a><a href="playground.html?s=slug" class="scenario-card"><div class="sc-icon">🔗</div><div class="sc-name">URL slug builder</div><div class="sc-desc">Titles to URL slugs</div><div class="sc-methods"><code>toLowerCase</code><code>replace</code><code>replaceAll</code></div></a><a href="playground.html?s=receipt" class="scenario-card"><div class="sc-icon">🧾</div><div class="sc-name">Receipt formatter</div><div class="sc-desc">Pad and align output</div><div class="sc-methods"><code>padStart</code><code>padEnd</code><code>slice</code><code>repeat</code></div></a><a href="playground.html?s=search" class="scenario-card"><div class="sc-icon">🔍</div><div class="sc-name">Search & highlight</div><div class="sc-desc">Find text in content</div><div class="sc-methods"><code>indexOf</code><code>lastIndexOf</code><code>match</code><code>substring</code></div></a></div>
   </section>
-
   <section class="methods-preview">
     <div class="section-label">Quick reference</div>
-    <h2 class="section-title">All 32 instance methods</h2>
+    <h2 class="section-title">All methods at a glance</h2>
     <div class="method-tag-grid">
-      <div class="tag-group">
-        <div class="tag-group-label search">Search & check</div>
-        <div class="tag-list">
-          <span class="mtag search">includes()</span><span class="mtag search">startsWith()</span><span class="mtag search">endsWith()</span><span class="mtag search">indexOf()</span><span class="mtag search">lastIndexOf()</span><span class="mtag search">match()</span><span class="mtag search">matchAll()</span><span class="mtag search">search()</span>
-        </div>
-      </div>
-      <div class="tag-group">
-        <div class="tag-group-label copy">Transform</div>
-        <div class="tag-list">
-          <span class="mtag copy">toLowerCase()</span><span class="mtag copy">toUpperCase()</span><span class="mtag copy">toLocaleLowerCase()</span><span class="mtag copy">toLocaleUpperCase()</span><span class="mtag copy">trim()</span><span class="mtag copy">trimStart()</span><span class="mtag copy">trimEnd()</span><span class="mtag copy">replace()</span><span class="mtag copy">replaceAll()</span><span class="mtag copy">normalize()</span>
-        </div>
-      </div>
-      <div class="tag-group">
-        <div class="tag-group-label iter">Extract</div>
-        <div class="tag-list">
-          <span class="mtag iter">slice()</span><span class="mtag iter">substring()</span><span class="mtag iter">at()</span><span class="mtag iter">charAt()</span><span class="mtag iter">split()</span>
-        </div>
-      </div>
-      <div class="tag-group">
-        <div class="tag-group-label mutates">Build</div>
-        <div class="tag-list">
-          <span class="mtag mutates">concat()</span><span class="mtag mutates">padStart()</span><span class="mtag mutates">padEnd()</span><span class="mtag mutates">repeat()</span>
-        </div>
-      </div>
-      <div class="tag-group">
-        <div class="tag-group-label other">Inspect</div>
-        <div class="tag-list">
-          <span class="mtag other">charCodeAt()</span><span class="mtag other">codePointAt()</span><span class="mtag other">localeCompare()</span><span class="mtag other">isWellFormed()</span><span class="mtag other">toWellFormed()</span><span class="mtag other">valueOf()</span><span class="mtag other">toString()</span>
-        </div>
-      </div>
-    </div>
+  <div class="tag-group"><div class="tag-group-label search">Search</div><div class="tag-list"><span class="mtag search">includes()</span><span class="mtag search">startsWith()</span><span class="mtag search">endsWith()</span><span class="mtag search">indexOf()</span><span class="mtag search">lastIndexOf()</span><span class="mtag search">match()</span><span class="mtag search">matchAll()</span><span class="mtag search">search()</span></div></div>
+  <div class="tag-group"><div class="tag-group-label copy">Transform</div><div class="tag-list"><span class="mtag copy">toLowerCase()</span><span class="mtag copy">toUpperCase()</span><span class="mtag copy">trim()</span><span class="mtag copy">trimStart()</span><span class="mtag copy">trimEnd()</span><span class="mtag copy">replace()</span><span class="mtag copy">replaceAll()</span></div></div>
+  <div class="tag-group"><div class="tag-group-label iter">Extract</div><div class="tag-list"><span class="mtag iter">slice()</span><span class="mtag iter">substring()</span><span class="mtag iter">at()</span><span class="mtag iter">charAt()</span><span class="mtag iter">split()</span></div></div>
+  <div class="tag-group"><div class="tag-group-label mutates">Build</div><div class="tag-list"><span class="mtag mutates">padStart()</span><span class="mtag mutates">padEnd()</span><span class="mtag mutates">repeat()</span><span class="mtag mutates">concat()</span></div></div>
+</div>
     <div style="text-align:center;margin-top:2rem">
-      <a href="reference.html" class="btn-secondary">View full reference with examples →</a>
+      <a href="reference.html" class="btn-secondary">View full reference →</a>
     </div>
   </section>
 </main>
-
 <footer class="site-footer">
   <div class="footer-inner">
-    <span class="logo"><span class="logo-bracket">[</span>JS<span class="logo-accent">Strings</span><span class="logo-bracket">]</span></span>
-    <span class="footer-note">Part of Fork My Brain · Open source</span>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank" rel="noopener" class="footer-link">MDN Docs ↗</a>
+    <span class="logo"><span class="logo-bracket">[</span>JS<span class="logo-accent">String Methods</span><span class="logo-bracket">]</span></span>
+    <span class="footer-note">Part of Fork My Brain</span>
+    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank" rel="noopener noreferrer" class="footer-link">MDN Docs ↗</a>
   </div>
 </footer>
-
 </body>
 </html>
